@@ -114,3 +114,20 @@ markers = [
     "ebpf: marks tests requiring Linux eBPF",
     "slow: marks slow tests"
 ]
+
+[tool.coverage.run]
+source = ["evalguard"]
+omit = [
+    "evalguard/sandbox/backends/firecracker.py",
+    "evalguard/sandbox/monitoring/ebpf_watcher.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "except ImportError:",
+]
