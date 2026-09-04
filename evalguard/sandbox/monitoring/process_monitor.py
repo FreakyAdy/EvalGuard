@@ -70,12 +70,31 @@ class ProcessMonitor:
         ignored_pids = set(excluded_pids or set())
         current_pids: set[int] = set()
 
+        ignored_proc_names = {
+            "brave.exe",
+            "chrome.exe",
+            "msedge.exe",
+            "firefox.exe",
+            "explorer.exe",
+            "svchost.exe",
+            "code.exe",
+            "searchindexer.exe",
+            "dwm.exe",
+            "runtimebroker.exe",
+            "taskhostw.exe",
+        }
+
         for proc in psutil.process_iter(["pid", "name", "cmdline", "create_time", "ppid"]):
             try:
                 info = proc.info
                 pid = info["pid"]
                 if pid is None or pid in ignored_pids:
                     continue
+
+                proc_name = (info.get("name") or "unknown").lower()
+                if proc_name in ignored_proc_names:
+                    continue
+
                 current_pids.add(pid)
 
                 # Process was NOT present prior to task execution
