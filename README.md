@@ -5,7 +5,7 @@
 
 **Audit the integrity of agent benchmarks before evaluating frontier models.**
 
-[![CI / Quality Gate](https://github.com/FreakyAdy/EvalGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/FreakyAdy/EvalGuard/actions)
+[![CI / Quality Gate](https://github.com/FreakyAdy/EvalGuard/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/FreakyAdy/EvalGuard/actions/workflows/ci.yml)
 [![Tests Passing](https://img.shields.io/badge/tests-63%2F63%20passed%20(100%25)-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](tests/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)

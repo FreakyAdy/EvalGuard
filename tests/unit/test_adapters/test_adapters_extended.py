@@ -19,6 +19,7 @@ class MockEvalAgent:
         class Res:
             passed = True
             output = "evaluated successfully"
+
         return Res()
 
 

@@ -121,7 +121,9 @@ class ContaminationFlag(BaseModel):
     """Contamination detection finding."""
 
     method: ContaminationType
-    score: float = Field(description="Detection metric (e.g. n-gram jaccard, cosine similarity, z-score)")
+    score: float = Field(
+        description="Detection metric (e.g. n-gram jaccard, cosine similarity, z-score)"
+    )
     threshold: float
     is_contaminated: bool
     details: str

@@ -138,7 +138,7 @@ class GenericSubprocessAdapter(HarnessAdapter):
             )
 
         # 3. If a verification test command is provided, run it to determine pass/fail
-        passed = (agent_exit == 0)
+        passed = agent_exit == 0
         if self.test_command_builder:
             test_cmd = self.test_command_builder(context)
             try:
@@ -153,7 +153,7 @@ class GenericSubprocessAdapter(HarnessAdapter):
                 output_chunks.append(f"[TEST STDOUT]\n{test_proc.stdout}")
                 if test_proc.stderr:
                     output_chunks.append(f"[TEST STDERR]\n{test_proc.stderr}")
-                passed = (test_proc.returncode == 0)
+                passed = test_proc.returncode == 0
             except Exception as test_err:
                 passed = False
                 output_chunks.append(f"[TEST ERROR] {test_err}")

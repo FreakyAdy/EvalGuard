@@ -32,7 +32,9 @@ def test_harness_sandbox_detects_unauthorized_env_mutation() -> None:
 
         try:
             violations = sb.get_violations()
-            env_violations = [v for v in violations if v.violation_type == BoundaryViolationType.ENV_VAR]
+            env_violations = [
+                v for v in violations if v.violation_type == BoundaryViolationType.ENV_VAR
+            ]
             assert len(env_violations) > 0
             assert "LEAKED_SECRET_VAR" in env_violations[0].detail
         finally:

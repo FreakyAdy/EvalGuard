@@ -23,7 +23,7 @@ def test_report_diff_computation() -> None:
 
     b2 = ReportBuilder(benchmark_id="B", agent_id="A2")
     b2.add_task_result(TaskAuditRecord(task_id="t1", agent_passed=False))  # flipped
-    b2.add_task_result(TaskAuditRecord(task_id="t2", agent_passed=True))   # improved
+    b2.add_task_result(TaskAuditRecord(task_id="t2", agent_passed=True))  # improved
     r2 = b2.build()
 
     diff = ReportDiffer.diff_reports(r1, r2)

@@ -53,7 +53,9 @@ def test_cli_report_view_diff_export() -> None:
         # 3. export commands
         for fmt in ["markdown", "html", "csv", "sarif"]:
             out_file = root / f"out.{fmt}"
-            res_exp = runner.invoke(cli, ["report", "export", str(r1_path), "--format", fmt, "--output", str(out_file)])
+            res_exp = runner.invoke(
+                cli, ["report", "export", str(r1_path), "--format", fmt, "--output", str(out_file)]
+            )
             assert res_exp.exit_code == 0
             assert out_file.exists()
 
@@ -62,17 +64,28 @@ def test_cli_contamination_audit() -> None:
     runner = CliRunner()
     with tempfile.TemporaryDirectory() as td:
         corpus = Path(td) / "corpus.txt"
-        corpus.write_text("def has_close_elements(numbers, threshold):\n    for idx, elem in enumerate(numbers):\n        pass\n")
+        corpus.write_text(
+            "def has_close_elements(numbers, threshold):\n    for idx, elem in enumerate(numbers):\n        pass\n"
+        )
         out_json = Path(td) / "contam_out.json"
 
-        res = runner.invoke(cli, [
-            "contamination", "audit",
-            "--benchmark", "humaneval",
-            "--agent-corpus", str(corpus),
-            "--disclosure-date", "2021-07-07",
-            "--cutoff-date", "2024-01-01",
-            "--output", str(out_json),
-        ])
+        res = runner.invoke(
+            cli,
+            [
+                "contamination",
+                "audit",
+                "--benchmark",
+                "humaneval",
+                "--agent-corpus",
+                str(corpus),
+                "--disclosure-date",
+                "2021-07-07",
+                "--cutoff-date",
+                "2024-01-01",
+                "--output",
+                str(out_json),
+            ],
+        )
         assert res.exit_code == 0
         assert out_json.exists()
 
@@ -88,12 +101,20 @@ def test_cli_audit_run() -> None:
     runner = CliRunner()
     with tempfile.TemporaryDirectory() as td:
         out_json = Path(td) / "audit_record.json"
-        res = runner.invoke(cli, [
-            "audit", "run",
-            "--task-id", "cli_test_task",
-            "--command", "python -c \"print('ok')\"",
-            "--backend", "host",
-            "--output", str(out_json),
-        ])
+        res = runner.invoke(
+            cli,
+            [
+                "audit",
+                "run",
+                "--task-id",
+                "cli_test_task",
+                "--command",
+                "python -c \"print('ok')\"",
+                "--backend",
+                "host",
+                "--output",
+                str(out_json),
+            ],
+        )
         assert res.exit_code == 0
         assert out_json.exists()

@@ -75,7 +75,7 @@ class ReportDiffer:
             notes: list[str] = []
 
             # 1. Pass status flips
-            pass_changed = (ta.agent_passed != tb.agent_passed)
+            pass_changed = ta.agent_passed != tb.agent_passed
             if pass_changed:
                 if ta.agent_passed and not tb.agent_passed:
                     flip_pass_to_fail.append(tid)
@@ -101,7 +101,7 @@ class ReportDiffer:
             # 4. Contamination flags
             ca = any(cf.is_contaminated for cf in ta.contamination_flags)
             cb = any(cf.is_contaminated for cf in tb.contamination_flags)
-            contam_changed = (ca != cb)
+            contam_changed = ca != cb
             if not ca and cb:
                 new_contaminations.append(tid)
                 notes.append("Newly flagged as contaminated in B")
@@ -137,8 +137,16 @@ class ReportDiffer:
     def render_diff(cls, diff: ReportDiffResult, console: Console | None = None) -> None:
         """Render diff to Rich terminal."""
         con = console or Console()
-        title = f"EvalGuard Report Diff: {diff.agent_a_id} vs {diff.agent_b_id} ({diff.benchmark_id})"
-        con.print(Panel(f"Compared {diff.total_tasks_compared} shared task(s).", title=title, border_style="blue"))
+        title = (
+            f"EvalGuard Report Diff: {diff.agent_a_id} vs {diff.agent_b_id} ({diff.benchmark_id})"
+        )
+        con.print(
+            Panel(
+                f"Compared {diff.total_tasks_compared} shared task(s).",
+                title=title,
+                border_style="blue",
+            )
+        )
 
         table = Table(title="Divergent Tasks", border_style="dim", show_lines=True)
         table.add_column("Task ID", style="cyan")

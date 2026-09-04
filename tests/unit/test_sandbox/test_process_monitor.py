@@ -24,7 +24,11 @@ def test_process_monitor_detects_ghost_process() -> None:
     proc = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(2)"])
     try:
         violations = monitor.detect_ghost_processes(task_id="ghost_test_01")
-        ghost_pids = [int(v.target.split(":")[1]) for v in violations if v.violation_type == BoundaryViolationType.GHOST_PROCESS]
+        ghost_pids = [
+            int(v.target.split(":")[1])
+            for v in violations
+            if v.violation_type == BoundaryViolationType.GHOST_PROCESS
+        ]
         assert proc.pid in ghost_pids
     finally:
         proc.terminate()

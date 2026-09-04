@@ -23,7 +23,7 @@ class CrossHarnessAuditor:
         res_a = self.adapter_a.run_task(agent, task_id)
         res_b = self.adapter_b.run_task(agent, task_id)
 
-        diverges = (res_a.passed != res_b.passed)
+        diverges = res_a.passed != res_b.passed
         evidence: list[str] = []
         status = TaskIntegrityStatus.PASS
 

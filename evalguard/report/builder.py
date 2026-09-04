@@ -49,7 +49,11 @@ class ReportBuilder:
         )
 
         suspect_or_invalid_tests = sum(
-            1 for t in self.tasks if t.test_integrity and t.test_integrity.status in (TaskIntegrityStatus.SUSPECT, TaskIntegrityStatus.INVALID)
+            1
+            for t in self.tasks
+            if t.test_integrity
+            and t.test_integrity.status
+            in (TaskIntegrityStatus.SUSPECT, TaskIntegrityStatus.INVALID)
         )
 
         clean_passed_tasks = sum(

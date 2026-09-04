@@ -76,7 +76,9 @@ class InotifyWatcher:
     ) -> None:
         self.task_id = task_id
         self.profile = profile
-        self.watch_paths = [Path(p).resolve() for p in (watch_paths or [profile.task_workspace_root])]
+        self.watch_paths = [
+            Path(p).resolve() for p in (watch_paths or [profile.task_workspace_root])
+        ]
         self.handler = BoundaryViolationHandler(task_id, profile, on_violation)
         self.observer: Any = None
 

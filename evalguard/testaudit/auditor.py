@@ -61,7 +61,10 @@ class TestAuditor:
             trivially_permissive = ref_rec.trivially_permissive
             if ref_rec.status == TaskIntegrityStatus.INVALID:
                 worst_status = TaskIntegrityStatus.INVALID
-            elif ref_rec.status == TaskIntegrityStatus.SUSPECT and worst_status != TaskIntegrityStatus.INVALID:
+            elif (
+                ref_rec.status == TaskIntegrityStatus.SUSPECT
+                and worst_status != TaskIntegrityStatus.INVALID
+            ):
                 worst_status = TaskIntegrityStatus.SUSPECT
 
         # 2. Statistical anomaly detection
@@ -69,7 +72,10 @@ class TestAuditor:
             stat_rec = self.statistical_detector.check_task_cohort(task_id, cohort_outcomes)
             all_evidence.extend(stat_rec.evidence)
             univ_rate = stat_rec.universal_pass_rate
-            if stat_rec.status == TaskIntegrityStatus.SUSPECT and worst_status != TaskIntegrityStatus.INVALID:
+            if (
+                stat_rec.status == TaskIntegrityStatus.SUSPECT
+                and worst_status != TaskIntegrityStatus.INVALID
+            ):
                 worst_status = TaskIntegrityStatus.SUSPECT
 
         # 3. Cross-harness consistency check
@@ -109,25 +115,35 @@ class TestAuditor:
         ]
 
         if record.reference_solver_passed is False:
-            lines.append("- :x: **Reference Solution Failed**: The official reference solver fails this test.")
+            lines.append(
+                "- :x: **Reference Solution Failed**: The official reference solver fails this test."
+            )
         if record.trivially_permissive:
-            lines.append("- :warning: **Overly Permissive**: Test accepts trivial non-functional code.")
+            lines.append(
+                "- :warning: **Overly Permissive**: Test accepts trivial non-functional code."
+            )
         if record.universal_pass_rate is not None:
             lines.append(f"- :bar_chart: **Cohort Pass Rate**: `{record.universal_pass_rate:.1%}`")
         if record.cross_harness_divergence:
-            lines.append("- :repeat: **Cross-Harness Divergence**: Results differ across sandboxing environments.")
+            lines.append(
+                "- :repeat: **Cross-Harness Divergence**: Results differ across sandboxing environments."
+            )
 
-        lines.extend([
-            "",
-            "### Audit Evidence",
-            "```text",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Audit Evidence",
+                "```text",
+            ]
+        )
         for ev in record.evidence:
             lines.append(f"- {ev}")
-        lines.extend([
-            "```",
-            "",
-            "> *Report generated automatically by EvalGuard Benchmark Integrity Infrastructure.*",
-        ])
+        lines.extend(
+            [
+                "```",
+                "",
+                "> *Report generated automatically by EvalGuard Benchmark Integrity Infrastructure.*",
+            ]
+        )
 
         return "\n".join(lines)

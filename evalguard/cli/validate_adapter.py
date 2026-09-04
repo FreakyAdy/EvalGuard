@@ -49,7 +49,9 @@ def validate_adapter(adapter_target: str) -> None:
         elif isinstance(obj, HarnessAdapter):
             adapter = obj
         else:
-            console.print(f"[bold red]Target '{adapter_target}' is not an instance or subclass of HarnessAdapter[/bold red]")
+            console.print(
+                f"[bold red]Target '{adapter_target}' is not an instance or subclass of HarnessAdapter[/bold red]"
+            )
             sys.exit(1)
 
     except Exception as e:
@@ -71,8 +73,12 @@ def validate_adapter(adapter_target: str) -> None:
     console.print(table)
 
     if report.all_passed:
-        console.print(f"\n[bold green]SUCCESS: Adapter '{adapter.name}' is fully compliant with EvalGuard v1.0 specifications![/bold green]")
+        console.print(
+            f"\n[bold green]SUCCESS: Adapter '{adapter.name}' is fully compliant with EvalGuard v1.0 specifications![/bold green]"
+        )
         sys.exit(0)
     else:
-        console.print(f"\n[bold red]FAILURE: Adapter '{adapter.name}' failed one or more contract checks.[/bold red]")
+        console.print(
+            f"\n[bold red]FAILURE: Adapter '{adapter.name}' failed one or more contract checks.[/bold red]"
+        )
         sys.exit(1)

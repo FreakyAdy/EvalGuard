@@ -20,10 +20,12 @@ from evalguard.sandbox.profiles import SandboxProfile
 
 
 def test_detector_fallback_to_host() -> None:
-    with patch.object(GVisorBackend, "is_available", return_value=False), \
-         patch.object(FirecrackerBackend, "is_available", return_value=False), \
-         patch.object(DockerBackend, "is_available", return_value=False), \
-         patch.object(PodmanBackend, "is_available", return_value=False):
+    with (
+        patch.object(GVisorBackend, "is_available", return_value=False),
+        patch.object(FirecrackerBackend, "is_available", return_value=False),
+        patch.object(DockerBackend, "is_available", return_value=False),
+        patch.object(PodmanBackend, "is_available", return_value=False),
+    ):
         backend_cls = detect_available_backend()
         assert backend_cls == HostProcessBackend
 
@@ -57,8 +59,10 @@ def test_docker_backend_mocked() -> None:
         backend = DockerBackend("task_docker_1", profile)
         assert backend.backend_name() == "docker"
 
-        with patch("shutil.which", return_value="/usr/bin/docker"), \
-             patch("subprocess.run") as mock_run:
+        with (
+            patch("shutil.which", return_value="/usr/bin/docker"),
+            patch("subprocess.run") as mock_run,
+        ):
             mock_run.return_value = MagicMock(returncode=0, stdout="ok", stderr="")
             assert DockerBackend.is_available() is True
 
@@ -86,8 +90,10 @@ def test_podman_backend_mocked() -> None:
         backend = PodmanBackend("task_podman_1", profile)
         assert backend.backend_name() == "podman"
 
-        with patch("shutil.which", return_value="/usr/bin/podman"), \
-             patch("subprocess.run") as mock_run:
+        with (
+            patch("shutil.which", return_value="/usr/bin/podman"),
+            patch("subprocess.run") as mock_run,
+        ):
             mock_run.return_value = MagicMock(returncode=0, stdout="ok", stderr="")
             assert PodmanBackend.is_available() is True
 
@@ -111,9 +117,13 @@ def test_gvisor_backend_mocked() -> None:
         backend = GVisorBackend("task_gvisor_1", profile)
         assert backend.backend_name() == "gvisor"
 
-        with patch("shutil.which", return_value="/usr/bin/runsc"), \
-             patch("subprocess.run") as mock_run:
-            mock_run.return_value = MagicMock(returncode=0, stdout="Runtimes: runsc runc", stderr="")
+        with (
+            patch("shutil.which", return_value="/usr/bin/runsc"),
+            patch("subprocess.run") as mock_run,
+        ):
+            mock_run.return_value = MagicMock(
+                returncode=0, stdout="Runtimes: runsc runc", stderr=""
+            )
             assert GVisorBackend.is_available() is True
 
             backend.setup()

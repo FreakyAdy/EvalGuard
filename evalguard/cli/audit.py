@@ -32,7 +32,9 @@ def audit_group() -> None:
 @click.option("--task-id", "-t", required=True, help="Task identifier")
 @click.option("--profile", "-p", type=click.Path(exists=True), help="Path to SandboxProfile YAML")
 @click.option("--command", "-c", required=True, help="Agent shell command to execute")
-@click.option("--backend", "-b", default="auto", help="Isolation backend: auto, docker, podman, host, gvisor")
+@click.option(
+    "--backend", "-b", default="auto", help="Isolation backend: auto, docker, podman, host, gvisor"
+)
 @click.option("--output", "-o", type=click.Path(), help="Output path for audit record JSON")
 def run_audit(
     task_id: str,
@@ -42,10 +44,14 @@ def run_audit(
     output: str | None,
 ) -> None:
     """Execute an agent command inside an EvalGuard hermetic sandbox."""
-    sb_profile = SandboxProfile.from_yaml(profile) if profile else SandboxProfile(name=f"audit-{task_id}")
+    sb_profile = (
+        SandboxProfile.from_yaml(profile) if profile else SandboxProfile(name=f"audit-{task_id}")
+    )
 
     adapter = GenericSubprocessAdapter(
-        name="swe-bench" if "swebench" in str(profile or "") or "django" in task_id else "cli-audit-adapter",
+        name="swe-bench"
+        if "swebench" in str(profile or "") or "django" in task_id
+        else "cli-audit-adapter",
         workspace_base_dir=sb_profile.task_workspace_root,
     )
 
@@ -115,10 +121,14 @@ def run_audit(
 
         # Check overall integrity status
         is_compromised = bool(audit_record.violations or tamper_events or hack_score >= 0.5)
-        status_str = "COMPROMISED" if is_compromised else ("CLEAN" if audit_record.agent_passed else "FAIL")
+        status_str = (
+            "COMPROMISED" if is_compromised else ("CLEAN" if audit_record.agent_passed else "FAIL")
+        )
 
         # Render Rich Formatted Audit Report
-        console.print("\n[bold cyan]============================================================\n  EVALGUARD BENCHMARK INTEGRITY AUDIT REPORT\n============================================================[/bold cyan]\n")
+        console.print(
+            "\n[bold cyan]============================================================\n  EVALGUARD BENCHMARK INTEGRITY AUDIT REPORT\n============================================================[/bold cyan]\n"
+        )
 
         meta_lines = [
             f"  [bold]Task ID:[/bold]           {task_id}",
@@ -131,53 +141,77 @@ def run_audit(
         console.print("\n".join(meta_lines))
 
         # 1. Boundary & Sandbox Violations
-        console.print(f"\n[bold yellow]------------------------------------------------------------\n  BOUNDARY & SANDBOX VIOLATIONS ({len(audit_record.violations)} detected)\n------------------------------------------------------------[/bold yellow]")
+        console.print(
+            f"\n[bold yellow]------------------------------------------------------------\n  BOUNDARY & SANDBOX VIOLATIONS ({len(audit_record.violations)} detected)\n------------------------------------------------------------[/bold yellow]"
+        )
         if audit_record.violations:
             for idx, v in enumerate(audit_record.violations, 1):
                 rule_id = "EG001" if v.violation_type.value == "filesystem" else "EG002"
-                console.print(f"\n  {idx}. [bold red][{v.severity.upper()}] {v.violation_type.value.capitalize()} Boundary Breach [{rule_id}][/bold red]")
+                console.print(
+                    f"\n  {idx}. [bold red][{v.severity.upper()}] {v.violation_type.value.capitalize()} Boundary Breach [{rule_id}][/bold red]"
+                )
                 console.print(f"     [bold]Target:[/bold] {v.target}")
                 console.print(f"     [bold]Detail:[/bold] {v.detail}")
                 console.print(f"     [bold]Timestamp:[/bold] {v.timestamp.isoformat()}")
                 if v.violation_type.value == "filesystem":
-                    console.print("     [dim]Fix: Mount root filesystem as read-only. Restrict writes strictly to workspace volume.[/dim]")
+                    console.print(
+                        "     [dim]Fix: Mount root filesystem as read-only. Restrict writes strictly to workspace volume.[/dim]"
+                    )
                 else:
-                    console.print("     [dim]Fix: Enforce cgroup v2 freezer / PID namespace isolation per task.[/dim]")
+                    console.print(
+                        "     [dim]Fix: Enforce cgroup v2 freezer / PID namespace isolation per task.[/dim]"
+                    )
         else:
-            console.print("  [green]No isolation boundary violations detected. Workspace hermeticity maintained.[/green]")
+            console.print(
+                "  [green]No isolation boundary violations detected. Workspace hermeticity maintained.[/green]"
+            )
 
         # 2. Reward Hacking & Tampering Analysis
-        console.print(f"\n[bold magenta]------------------------------------------------------------\n  REWARD HACKING & TAMPERING ANALYSIS (Score: {hack_score:.2f}/1.0)\n------------------------------------------------------------[/bold magenta]")
+        console.print(
+            f"\n[bold magenta]------------------------------------------------------------\n  REWARD HACKING & TAMPERING ANALYSIS (Score: {hack_score:.2f}/1.0)\n------------------------------------------------------------[/bold magenta]"
+        )
         if tamper_events:
             console.print("  [bold red][STATIC AST TAMPER DETECTIONS][/bold red]")
             for idx, te in enumerate(tamper_events, 1):
                 rule = "EG003" if "direct" in te.tamper_type.value else "EG004"
                 loc = f"{te.file_path}:{te.line_number}" if te.line_number else te.file_path
-                console.print(f"  {idx}. [bold red][CRITICAL] {te.tamper_type.value.replace('_', ' ').title()} [{rule}][/bold red]")
+                console.print(
+                    f"  {idx}. [bold red][CRITICAL] {te.tamper_type.value.replace('_', ' ').title()} [{rule}][/bold red]"
+                )
                 console.print(f"     [bold]File:[/bold] {loc}")
                 console.print(f"     [bold]Detail:[/bold] {te.description}")
                 if te.code_snippet:
                     console.print(f"     [dim]Snippet: {te.code_snippet}[/dim]")
         else:
-            console.print("  [green]No static AST test tampering or mock hijacking detected.[/green]")
+            console.print(
+                "  [green]No static AST test tampering or mock hijacking detected.[/green]"
+            )
 
         if mutation_probes:
             diverged_cnt = sum(1 for p in mutation_probes if not p.mutated_passed)
             console.print("\n  [bold cyan][DYNAMIC TEST MUTATION PROBING][/bold cyan]")
-            console.print(f"  Probes Synthesized: {len(mutation_probes)} | Probes Failed: {diverged_cnt} | Divergence Rate: {(diverged_cnt / len(mutation_probes)):.1%}")
+            console.print(
+                f"  Probes Synthesized: {len(mutation_probes)} | Probes Failed: {diverged_cnt} | Divergence Rate: {(diverged_cnt / len(mutation_probes)):.1%}"
+            )
             for idx, probe in enumerate(mutation_probes, 1):
                 status_color = "red" if not probe.mutated_passed else "green"
                 status_label = "FAIL" if not probe.mutated_passed else "PASS"
-                console.print(f"  * [{status_color}][{status_label}][/{status_color}] Probe #{idx} ({probe.strategy}): {probe.diff_summary}")
+                console.print(
+                    f"  * [{status_color}][{status_label}][/{status_color}] Probe #{idx} ({probe.strategy}): {probe.diff_summary}"
+                )
 
         # Summary Banner
         console.print("\n[bold]============================================================[/bold]")
         if is_compromised:
             total_findings = len(audit_record.violations) + len(tamper_events)
-            console.print(f"[bold red]FAIL: Task {task_id} compromised by {total_findings} critical integrity violations.[/bold red]")
+            console.print(
+                f"[bold red]FAIL: Task {task_id} compromised by {total_findings} critical integrity violations.[/bold red]"
+            )
             console.print("[dim]Exit code: 1[/dim]\n")
         else:
-            console.print(f"[bold green]SUCCESS: Task {task_id} passed integrity audit with 0 violations.[/bold green]")
+            console.print(
+                f"[bold green]SUCCESS: Task {task_id} passed integrity audit with 0 violations.[/bold green]"
+            )
             console.print("[dim]Exit code: 0[/dim]\n")
 
         if output:

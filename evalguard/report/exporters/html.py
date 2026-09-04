@@ -13,23 +13,39 @@ class HtmlExporter:
     @classmethod
     def export(cls, report: EvalGuardReport) -> str:
         s = report.summary
-        clean_pct = f"{(s.clean_passed_tasks / s.total_tasks * 100):.1f}%" if s.total_tasks else "0%"
+        clean_pct = (
+            f"{(s.clean_passed_tasks / s.total_tasks * 100):.1f}%" if s.total_tasks else "0%"
+        )
         raw_pct = f"{(s.agent_passed_tasks / s.total_tasks * 100):.1f}%" if s.total_tasks else "0%"
 
         task_rows = []
         for t in report.tasks:
-            pass_badge = '<span class="badge pass">PASS</span>' if t.agent_passed else '<span class="badge fail">FAIL</span>'
-            viol_badge = f'<span class="badge warn">{len(t.violations)} viol</span>' if t.violations else '<span class="badge clean">hermetic</span>'
+            pass_badge = (
+                '<span class="badge pass">PASS</span>'
+                if t.agent_passed
+                else '<span class="badge fail">FAIL</span>'
+            )
+            viol_badge = (
+                f'<span class="badge warn">{len(t.violations)} viol</span>'
+                if t.violations
+                else '<span class="badge clean">hermetic</span>'
+            )
 
             hack_score = t.reward_hack.confidence_score if t.reward_hack else 0.0
             hack_class = "fail" if hack_score >= 0.7 else ("warn" if hack_score >= 0.3 else "clean")
             hack_badge = f'<span class="badge {hack_class}">{hack_score:.2f}</span>'
 
             has_contam = any(cf.is_contaminated for cf in t.contamination_flags)
-            contam_badge = '<span class="badge warn">FLAGGED</span>' if has_contam else '<span class="badge clean">CLEAN</span>'
+            contam_badge = (
+                '<span class="badge warn">FLAGGED</span>'
+                if has_contam
+                else '<span class="badge clean">CLEAN</span>'
+            )
 
             t_status = t.test_integrity.status.value if t.test_integrity else "PASS"
-            test_class = "fail" if t_status == "INVALID" else ("warn" if t_status == "SUSPECT" else "clean")
+            test_class = (
+                "fail" if t_status == "INVALID" else ("warn" if t_status == "SUSPECT" else "clean")
+            )
             test_badge = f'<span class="badge {test_class}">{t_status}</span>'
 
             row = f"""
@@ -96,7 +112,7 @@ class HtmlExporter:
         <strong>Benchmark:</strong> {html.escape(report.benchmark_id)} &bull;
         <strong>Agent:</strong> {html.escape(report.agent_id)} &bull;
         <strong>Harness:</strong> {html.escape(report.harness_name)} &bull;
-        <strong>Date:</strong> {report.created_at.strftime('%Y-%m-%d %H:%M:%S UTC')} &bull;
+        <strong>Date:</strong> {report.created_at.strftime("%Y-%m-%d %H:%M:%S UTC")} &bull;
         <strong>ID:</strong> <code>{report.report_id}</code>
       </div>
     </header>

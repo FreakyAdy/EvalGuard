@@ -24,7 +24,9 @@ class BenchmarkContaminationIndex:
         corpus_disclosure_date: str | None = None,
     ) -> None:
         self.benchmark_name = benchmark_name
-        self.tasks: dict[str, dict[str, Any]] = tasks or {}  # task_id -> {prompt, solution, test, ...}
+        self.tasks: dict[str, dict[str, Any]] = (
+            tasks or {}
+        )  # task_id -> {prompt, solution, test, ...}
         self.corpus_disclosure_date = corpus_disclosure_date
         self._ngram_index: dict[tuple[str, ...], set[str]] = {}
 

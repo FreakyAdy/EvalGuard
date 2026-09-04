@@ -176,10 +176,13 @@ class AdapterVerifier:
 
     def _test_audit_wrapping(self) -> None:
         try:
+
             def dummy_agent(ctx: TaskContext) -> bool:
                 return True
 
-            audit_rec = self.adapter.run_task_with_audit(dummy_agent, "verify_audit_002")
+            audit_rec = self.adapter.run_task_with_audit(
+                dummy_agent, "verify_audit_002", sandbox_backend="host"
+            )
             if audit_rec.task_id != "verify_audit_002":
                 self.results.append(
                     AdapterCheckResult(

@@ -88,7 +88,9 @@ class AssertionReorderMutator(MutationStrategy):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 body = node.body
                 # Find blocks of consecutive Assert statements
-                assert_indices: list[int] = [i for i, stmt in enumerate(body) if isinstance(stmt, ast.Assert)]
+                assert_indices: list[int] = [
+                    i for i, stmt in enumerate(body) if isinstance(stmt, ast.Assert)
+                ]
                 if len(assert_indices) >= 2:
                     # Reverse consecutive asserts
                     i1, i2 = assert_indices[0], assert_indices[1]

@@ -31,7 +31,9 @@ def test_tamper_detector_direct_test_file_modification() -> None:
 def test_tamper_detector_conftest_injection() -> None:
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
-        (root / "conftest.py").write_text("import pytest\n@pytest.fixture(autouse=True)\ndef bypass(): pass")
+        (root / "conftest.py").write_text(
+            "import pytest\n@pytest.fixture(autouse=True)\ndef bypass(): pass"
+        )
 
         events = TamperDetector.check_indirect_tampering(root, ["conftest.py"])
         assert len(events) >= 1

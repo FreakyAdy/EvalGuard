@@ -49,7 +49,9 @@ class TrajectoryAnalyzer:
                 time_to_first_pass = e.timestamp_offset
                 break
 
-        first_attempt_success = (test_runs == 1 and final_passed) or (test_runs == 0 and final_passed and edit_count == 1)
+        first_attempt_success = (test_runs == 1 and final_passed) or (
+            test_runs == 0 and final_passed and edit_count == 1
+        )
         anomaly_score = 0.0
         notes: list[str] = []
 
@@ -64,7 +66,9 @@ class TrajectoryAnalyzer:
             # 2. Zero-shot direct write without test iterations
             if first_attempt_success and edit_count <= 1:
                 anomaly_score += 0.35
-                notes.append("Agent solved complex problem with 1 direct edit and 0 prior test failures (possible memorization)")
+                notes.append(
+                    "Agent solved complex problem with 1 direct edit and 0 prior test failures (possible memorization)"
+                )
 
             # 3. No intermediate debugging steps
             if test_runs == 0 and edit_count > 0:

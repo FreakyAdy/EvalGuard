@@ -82,7 +82,9 @@ class PodmanBackend(SandboxBackend):
     ) -> CommandResult:
         """Execute command in running podman container."""
         if not self._is_running:
-            raise RuntimeError(f"Cannot exec in non-running podman container '{self.container_name}'")
+            raise RuntimeError(
+                f"Cannot exec in non-running podman container '{self.container_name}'"
+            )
 
         exec_cmd = ["podman", "exec"]
         if cwd:

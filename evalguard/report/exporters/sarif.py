@@ -35,13 +35,17 @@ class SarifExporter:
             {
                 "id": "EG004",
                 "name": "IndirectEnvironmentTampering",
-                "shortDescription": {"text": "Agent injected conftest.py or manipulated sys.path/mocks"},
+                "shortDescription": {
+                    "text": "Agent injected conftest.py or manipulated sys.path/mocks"
+                },
                 "defaultConfiguration": {"level": "error"},
             },
             {
                 "id": "EG005",
                 "name": "RewardHackingProbeDivergence",
-                "shortDescription": {"text": "Agent failed semantically equivalent mutated test probes"},
+                "shortDescription": {
+                    "text": "Agent failed semantically equivalent mutated test probes"
+                },
                 "defaultConfiguration": {"level": "warning"},
             },
         ]
@@ -52,15 +56,19 @@ class SarifExporter:
             # Boundary violations
             for v in task.violations:
                 rule_id = "EG001" if v.violation_type.value == "filesystem" else "EG002"
-                results.append({
-                    "ruleId": rule_id,
-                    "message": {"text": f"[{task.task_id}] {v.detail}"},
-                    "locations": [{
-                        "physicalLocation": {
-                            "artifactLocation": {"uri": v.target},
-                        }
-                    }],
-                })
+                results.append(
+                    {
+                        "ruleId": rule_id,
+                        "message": {"text": f"[{task.task_id}] {v.detail}"},
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {"uri": v.target},
+                                }
+                            }
+                        ],
+                    }
+                )
 
             # Tamper events
             if task.reward_hack:
@@ -74,11 +82,13 @@ class SarifExporter:
                     if te.line_number:
                         loc["physicalLocation"]["region"] = {"startLine": te.line_number}
 
-                    results.append({
-                        "ruleId": rule_id,
-                        "message": {"text": f"[{task.task_id}] {te.description}"},
-                        "locations": [loc],
-                    })
+                    results.append(
+                        {
+                            "ruleId": rule_id,
+                            "message": {"text": f"[{task.task_id}] {te.description}"},
+                            "locations": [loc],
+                        }
+                    )
 
         sarif_doc = {
             "$schema": "https://json.schemastore.org/sarif-2.1.0.json",

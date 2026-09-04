@@ -69,7 +69,9 @@ class HarnessAdapter(ABC):
     this interface without needing to alter their internal codebases.
     """
 
-    def __init__(self, name: str, capabilities: AdapterCapabilities = AdapterCapabilities.NONE) -> None:
+    def __init__(
+        self, name: str, capabilities: AdapterCapabilities = AdapterCapabilities.NONE
+    ) -> None:
         self.name = name
         self.capabilities = capabilities
 

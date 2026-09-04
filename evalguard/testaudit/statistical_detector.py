@@ -30,13 +30,19 @@ class StatisticalDetector:
         agent_outcomes: Sequence[bool] | Mapping[str, bool],
     ) -> TestIntegrityRecord:
         """Evaluate if task exhibits extreme degenerate pass rates across the agent population."""
-        outcomes = list(agent_outcomes.values()) if isinstance(agent_outcomes, Mapping) else list(agent_outcomes)
+        outcomes = (
+            list(agent_outcomes.values())
+            if isinstance(agent_outcomes, Mapping)
+            else list(agent_outcomes)
+        )
         cohort_size = len(outcomes)
 
         if cohort_size < self.min_cohort_size:
             return TestIntegrityRecord(
                 status=TaskIntegrityStatus.PASS,
-                evidence=[f"Cohort size ({cohort_size}) below statistical minimum ({self.min_cohort_size})"],
+                evidence=[
+                    f"Cohort size ({cohort_size}) below statistical minimum ({self.min_cohort_size})"
+                ],
             )
 
         passed_count = sum(1 for o in outcomes if o)

@@ -22,8 +22,19 @@ def contamination_group() -> None:
 
 
 @contamination_group.command(name="audit")
-@click.option("--benchmark", "-b", required=True, help="Benchmark name (e.g. humaneval, swebench-verified, mbpp)")
-@click.option("--agent-corpus", "-c", type=click.Path(exists=True), required=True, help="Path to agent training text or manifest JSON")
+@click.option(
+    "--benchmark",
+    "-b",
+    required=True,
+    help="Benchmark name (e.g. humaneval, swebench-verified, mbpp)",
+)
+@click.option(
+    "--agent-corpus",
+    "-c",
+    type=click.Path(exists=True),
+    required=True,
+    help="Path to agent training text or manifest JSON",
+)
 @click.option("--disclosure-date", "-d", help="Benchmark disclosure date (YYYY-MM-DD)")
 @click.option("--cutoff-date", help="Agent pre-training cutoff date (YYYY-MM-DD)")
 @click.option("--output", "-o", type=click.Path(), help="Output path for contamination report JSON")
@@ -72,8 +83,16 @@ def audit_contamination(
     # 1. Timeline check
     timeline_flag = auditor.timeline_auditor.evaluate_agent(cutoff_date)
     all_flags.append(timeline_flag.model_dump())
-    tl_status = "[bold red]EXPOSED[/bold red]" if timeline_flag.is_contaminated else "[green]CLEAN[/green]"
-    table.add_row("Global Timeline", "timeline", tl_status, f"{timeline_flag.score:.1f}", timeline_flag.details)
+    tl_status = (
+        "[bold red]EXPOSED[/bold red]" if timeline_flag.is_contaminated else "[green]CLEAN[/green]"
+    )
+    table.add_row(
+        "Global Timeline",
+        "timeline",
+        tl_status,
+        f"{timeline_flag.score:.1f}",
+        timeline_flag.details,
+    )
 
     # 2. Lexical & Semantic checks across indexed tasks
     for tid, tinfo in auditor.index.tasks.items():
@@ -82,18 +101,28 @@ def audit_contamination(
         if lex_res.is_contaminated or lex_res.containment_score > 0.15:
             matched_tasks += 1
             sem_score, sem_contam = auditor.semantic_detector.compare(corpus_text, ref_text)
-            c_status = "[bold red]FLAGGED[/bold red]" if (lex_res.is_contaminated or sem_contam) else "[yellow]SUSPECT[/yellow]"
+            c_status = (
+                "[bold red]FLAGGED[/bold red]"
+                if (lex_res.is_contaminated or sem_contam)
+                else "[yellow]SUSPECT[/yellow]"
+            )
             details = f"Containment: {lex_res.containment_score:.2f}, Semantic Sim: {sem_score:.2f}"
-            table.add_row(tid, "lexical+semantic", c_status, f"{lex_res.containment_score:.2f}", details)
-            all_flags.append({
-                "task_id": tid,
-                "lexical_containment": lex_res.containment_score,
-                "semantic_similarity": sem_score,
-                "is_contaminated": (lex_res.is_contaminated or sem_contam),
-            })
+            table.add_row(
+                tid, "lexical+semantic", c_status, f"{lex_res.containment_score:.2f}", details
+            )
+            all_flags.append(
+                {
+                    "task_id": tid,
+                    "lexical_containment": lex_res.containment_score,
+                    "semantic_similarity": sem_score,
+                    "is_contaminated": (lex_res.is_contaminated or sem_contam),
+                }
+            )
 
     console.print(table)
-    console.print(f"Tasks scanned: {len(auditor.index.tasks)} | Matched with flags: {matched_tasks}")
+    console.print(
+        f"Tasks scanned: {len(auditor.index.tasks)} | Matched with flags: {matched_tasks}"
+    )
 
     if output:
         out_path = Path(output).resolve()

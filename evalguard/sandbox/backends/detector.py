@@ -38,7 +38,9 @@ def detect_available_backend() -> type[SandboxBackend]:
             logger.info("Auto-detected sandboxing backend: %s", name)
             return backend_cls
 
-    logger.warning("No container/VM runtime detected. Falling back to host process isolation with watcher.")
+    logger.warning(
+        "No container/VM runtime detected. Falling back to host process isolation with watcher."
+    )
     return HostProcessBackend
 
 
@@ -59,6 +61,8 @@ def get_backend(
             )
             backend_cls = detect_available_backend()
     else:
-        raise ValueError(f"Unknown sandbox backend: '{backend_name}'. Available: {list(BACKEND_REGISTRY.keys())}")
+        raise ValueError(
+            f"Unknown sandbox backend: '{backend_name}'. Available: {list(BACKEND_REGISTRY.keys())}"
+        )
 
     return backend_cls(task_id, profile)

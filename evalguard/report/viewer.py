@@ -21,10 +21,20 @@ class ReportViewer:
         # 1. Header Banner
         header_text = Text()
         header_text.append(f"Report ID: {report.report_id}\n", style="bold cyan")
-        header_text.append(f"Benchmark: {report.benchmark_id}  |  Agent: {report.agent_id}  |  Harness: {report.harness_name}\n")
-        header_text.append(f"Timestamp: {report.created_at.strftime('%Y-%m-%d %H:%M:%S UTC')}  |  Schema: v{report.schema_version}")
+        header_text.append(
+            f"Benchmark: {report.benchmark_id}  |  Agent: {report.agent_id}  |  Harness: {report.harness_name}\n"
+        )
+        header_text.append(
+            f"Timestamp: {report.created_at.strftime('%Y-%m-%d %H:%M:%S UTC')}  |  Schema: v{report.schema_version}"
+        )
 
-        self.console.print(Panel(header_text, title="[bold green][EvalGuard] Benchmark Integrity Audit[/bold green]", border_style="green"))
+        self.console.print(
+            Panel(
+                header_text,
+                title="[bold green][EvalGuard] Benchmark Integrity Audit[/bold green]",
+                border_style="green",
+            )
+        )
 
         # 2. Key Metrics Summary Table
         s = report.summary
@@ -34,22 +44,46 @@ class ReportViewer:
         metric_table.add_column("Status / Implication")
 
         metric_table.add_row("Total Tasks Audited", str(s.total_tasks), "100%")
-        metric_table.add_row("Agent Passing Tasks (Nominal)", str(s.agent_passed_tasks), f"{(s.agent_passed_tasks/s.total_tasks*100) if s.total_tasks else 0:.1f}% raw pass rate")
+        metric_table.add_row(
+            "Agent Passing Tasks (Nominal)",
+            str(s.agent_passed_tasks),
+            f"{(s.agent_passed_tasks / s.total_tasks * 100) if s.total_tasks else 0:.1f}% raw pass rate",
+        )
 
         clean_style = "green" if s.clean_passed_tasks > 0 else "red"
-        metric_table.add_row("Clean Passing Tasks (Verified)", f"[{clean_style}]{s.clean_passed_tasks}[/{clean_style}]", "No violations, hacking, or contamination")
+        metric_table.add_row(
+            "Clean Passing Tasks (Verified)",
+            f"[{clean_style}]{s.clean_passed_tasks}[/{clean_style}]",
+            "No violations, hacking, or contamination",
+        )
 
         viol_style = "red" if s.tasks_with_violations > 0 else "green"
-        metric_table.add_row("Boundary Violations", f"[{viol_style}]{s.boundary_violations_total} (in {s.tasks_with_violations} tasks)[/{viol_style}]", "Hermetic isolation compromised")
+        metric_table.add_row(
+            "Boundary Violations",
+            f"[{viol_style}]{s.boundary_violations_total} (in {s.tasks_with_violations} tasks)[/{viol_style}]",
+            "Hermetic isolation compromised",
+        )
 
         hack_style = "red" if s.tasks_with_reward_hack > 0 else "green"
-        metric_table.add_row("Reward Hacking Flags", f"[{hack_style}]{s.tasks_with_reward_hack}[/{hack_style}]", "Test tampering or mutated probe failures")
+        metric_table.add_row(
+            "Reward Hacking Flags",
+            f"[{hack_style}]{s.tasks_with_reward_hack}[/{hack_style}]",
+            "Test tampering or mutated probe failures",
+        )
 
         contam_style = "yellow" if s.tasks_with_contamination > 0 else "green"
-        metric_table.add_row("Contaminated Tasks", f"[{contam_style}]{s.tasks_with_contamination}[/{contam_style}]", "Lexical, semantic, or timeline exposure")
+        metric_table.add_row(
+            "Contaminated Tasks",
+            f"[{contam_style}]{s.tasks_with_contamination}[/{contam_style}]",
+            "Lexical, semantic, or timeline exposure",
+        )
 
         test_style = "magenta" if s.suspect_or_invalid_tests > 0 else "green"
-        metric_table.add_row("Flawed / Suspect Tests", f"[{test_style}]{s.suspect_or_invalid_tests}[/{test_style}]", "Reference solution failed or trivial pass")
+        metric_table.add_row(
+            "Flawed / Suspect Tests",
+            f"[{test_style}]{s.suspect_or_invalid_tests}[/{test_style}]",
+            "Reference solution failed or trivial pass",
+        )
 
         self.console.print(metric_table)
         self.console.print()

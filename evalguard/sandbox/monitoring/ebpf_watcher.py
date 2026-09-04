@@ -74,6 +74,7 @@ class EbpfWatcher:
             return False
         try:
             import bcc  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -90,9 +91,13 @@ class EbpfWatcher:
             from bcc import BPF
 
             self._bpf = BPF(text=BPF_SYSCALL_TRACER_C)
-            self._bpf.attach_kprobe(event=self._bpf.get_syscall_fnname("openat"), fn_name="syscall__enter_openat")
+            self._bpf.attach_kprobe(
+                event=self._bpf.get_syscall_fnname("openat"), fn_name="syscall__enter_openat"
+            )
             self._is_running = True
-            logger.info("eBPF watcher successfully attached to sys_enter_openat for task %s", self.task_id)
+            logger.info(
+                "eBPF watcher successfully attached to sys_enter_openat for task %s", self.task_id
+            )
         except Exception as e:
             raise EbpfUnavailableError(f"Failed to load eBPF probe: {e}") from e
 

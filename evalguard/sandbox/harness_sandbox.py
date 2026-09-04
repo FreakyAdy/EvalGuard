@@ -114,7 +114,21 @@ class HarnessSandbox:
 
         # 5. Initialize backend
         self._backend = get_backend(self.backend_name, self.task_id, self.profile)
-        self._backend.setup()
+        try:
+            self._backend.setup()
+        except Exception as e:
+            if not self.backend_name or self.backend_name == "auto":
+                logger.warning(
+                    "Backend '%s' failed setup (%s). Falling back to host process isolation.",
+                    self._backend.backend_name(),
+                    e,
+                )
+                from evalguard.sandbox.backends.host import HostProcessBackend
+
+                self._backend = HostProcessBackend(self.task_id, self.profile)
+                self._backend.setup()
+            else:
+                raise
 
         # 6. Start eBPF watcher if supported; otherwise fallback to inotify/watchdog
         try:
@@ -130,7 +144,9 @@ class HarnessSandbox:
             self._inotify_watcher = InotifyWatcher(
                 self.task_id,
                 self.profile,
-                watch_paths=[workspace_path.parent if workspace_path.parent.exists() else workspace_path],
+                watch_paths=[
+                    workspace_path.parent if workspace_path.parent.exists() else workspace_path
+                ],
                 on_violation=self._record_violation,
             )
             self._inotify_watcher.start()
@@ -247,7 +263,9 @@ class HarnessSandbox:
     def get_snapshot(self) -> tuple[WorkspaceSnapshot, WorkspaceSnapshot]:
         """Return (pre_snapshot, post_snapshot)."""
         if self._pre_snapshot is None or self._post_snapshot is None:
-            raise RuntimeError("Snapshots are only available after exiting or capturing inside sandbox context.")
+            raise RuntimeError(
+                "Snapshots are only available after exiting or capturing inside sandbox context."
+            )
         return (self._pre_snapshot, self._post_snapshot)
 
     def get_snapshot_diff(self) -> SnapshotDiffRecord:

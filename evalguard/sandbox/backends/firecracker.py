@@ -45,7 +45,9 @@ class FirecrackerBackend(SandboxBackend):
     def setup(self) -> None:
         """Initialize Firecracker microVM socket and spawn daemon."""
         if not self.is_available():
-            raise RuntimeError("Firecracker backend is not available on this host (requires /dev/kvm).")
+            raise RuntimeError(
+                "Firecracker backend is not available on this host (requires /dev/kvm)."
+            )
 
         if self.socket_path.exists():
             self.socket_path.unlink()

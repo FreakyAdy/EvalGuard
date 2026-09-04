@@ -35,7 +35,7 @@ jobs:
           python-version: "3.11"
       - name: Install Dependencies
         run: |
-          pip install -e ".[dev,semantic]"
+          pip install -e ".[dev]"
       - name: Run Mypy
         run: mypy evalguard/
 
@@ -77,7 +77,7 @@ jobs:
           python-version: "3.11"
       - name: Install Dependencies
         run: |
-          pip install -e ".[all,dev]"
+          pip install -e ".[dev]"
       - name: Run Integration Tests
         run: |
           pytest tests/integration/ -v
@@ -93,7 +93,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install Dependencies
-        run: pip install -e ".[all,dev]"
+        run: pip install -e ".[dev]"
       - name: Check Coverage Threshold
         run: |
           pytest tests/ -v --cov=evalguard --cov-fail-under=80

@@ -27,7 +27,12 @@ class TamperASTVisitor(ast.NodeVisitor):
         # Check for sys.path.insert(0, ...) or sys.path.append(...)
         if isinstance(node.func, ast.Attribute):
             val = node.func.value
-            if isinstance(val, ast.Attribute) and val.attr == "path" and isinstance(val.value, ast.Name) and val.value.id == "sys":
+            if (
+                isinstance(val, ast.Attribute)
+                and val.attr == "path"
+                and isinstance(val.value, ast.Name)
+                and val.value.id == "sys"
+            ):
                 if node.func.attr in ("insert", "append", "extend"):
                     self.tamper_events.append(
                         TamperEventRecord(
@@ -58,7 +63,12 @@ class TamperASTVisitor(ast.NodeVisitor):
         for target in node.targets:
             if isinstance(target, ast.Subscript):
                 val = target.value
-                if isinstance(val, ast.Attribute) and val.attr == "modules" and isinstance(val.value, ast.Name) and val.value.id == "sys":
+                if (
+                    isinstance(val, ast.Attribute)
+                    and val.attr == "modules"
+                    and isinstance(val.value, ast.Name)
+                    and val.value.id == "sys"
+                ):
                     self.tamper_events.append(
                         TamperEventRecord(
                             tamper_type=TamperType.MOCK_INTERCEPTION,
