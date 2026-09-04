@@ -1,0 +1,116 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "evalguard"
+version = "0.1.0"
+description = "Benchmark Integrity Infrastructure for Agent Evaluations"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "EvalGuard Contributors" }
+]
+keywords = [
+    "ai-agents",
+    "benchmarking",
+    "evaluation",
+    "sandboxing",
+    "contamination",
+    "reward-hacking",
+    "testing-infrastructure"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+dependencies = [
+    "click>=8.1.0",
+    "pydantic>=2.5.0",
+    "rich>=13.0.0",
+    "pyyaml>=6.0.0",
+    "watchdog>=3.0.0",
+    "psutil>=5.9.0"
+]
+
+[project.optional-dependencies]
+semantic = [
+    "sentence-transformers>=2.2.0",
+    "torch>=2.0.0"
+]
+ebpf = [
+    # Optional eBPF backend requirements (bcc / cilium-ebpf bindings)
+]
+api = [
+    "openai>=1.0.0",
+    "anthropic>=0.20.0"
+]
+all = [
+    "evalguard[semantic,api]"
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "pytest-asyncio>=0.23.0",
+    "mypy>=1.6.0",
+    "ruff>=0.1.0",
+    "types-PyYAML>=6.0.0",
+    "types-psutil>=5.9.0"
+]
+
+[project.scripts]
+evalguard = "evalguard.cli.main:cli"
+
+[project.entry-points.pytest11]
+evalguard_adapter = "evalguard.adapters.pytest_plugin"
+
+[tool.hatch.build.targets.wheel]
+packages = ["evalguard"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "UP", "N"]
+ignore = ["B008", "E501"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+explicit_package_bases = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "watchdog.*",
+    "sentence_transformers.*",
+    "bcc.*"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"
+markers = [
+    "docker: marks tests requiring docker daemon",
+    "ebpf: marks tests requiring Linux eBPF",
+    "slow: marks slow tests"
+]

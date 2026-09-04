@@ -1,0 +1,21 @@
+name: openenv
+task_workspace_root: ./openenv_workspace
+allowed_write_paths:
+  - ./openenv_workspace
+  - /tmp/openenv
+denied_write_paths:
+  - /etc
+  - /root
+  - ~/.ssh
+allowed_env_vars:
+  - PATH
+  - HOME
+  - USER
+  - PYTHONUNBUFFERED
+  - OPENENV_DATA_DIR
+allowed_network_cidrs: []
+allow_outbound_network: false
+max_memory_mb: 6144
+timeout_seconds: 900
+prevent_ghost_processes: true
+track_shared_memory: true

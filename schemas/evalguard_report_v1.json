@@ -1,0 +1,579 @@
+{
+  "$defs": {
+    "BoundaryViolationRecord": {
+      "description": "Record of a boundary violation during task execution.",
+      "properties": {
+        "violation_type": {
+          "$ref": "#/$defs/BoundaryViolationType"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "target": {
+          "description": "Target file, env var name, PID, or socket address",
+          "title": "Target",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "severity": {
+          "default": "high",
+          "description": "Severity level: low, medium, high, critical",
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "violation_type",
+        "detail",
+        "target"
+      ],
+      "title": "BoundaryViolationRecord",
+      "type": "object"
+    },
+    "BoundaryViolationType": {
+      "description": "Types of isolation boundary violations detected in sandboxes.",
+      "enum": [
+        "filesystem",
+        "env_var",
+        "ghost_process",
+        "network_socket",
+        "shared_memory"
+      ],
+      "title": "BoundaryViolationType",
+      "type": "string"
+    },
+    "ContaminationFlag": {
+      "description": "Contamination detection finding.",
+      "properties": {
+        "method": {
+          "$ref": "#/$defs/ContaminationType"
+        },
+        "score": {
+          "description": "Detection metric (e.g. n-gram jaccard, cosine similarity, z-score)",
+          "title": "Score",
+          "type": "number"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "is_contaminated": {
+          "title": "Is Contaminated",
+          "type": "boolean"
+        },
+        "details": {
+          "title": "Details",
+          "type": "string"
+        },
+        "matched_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matched Reference"
+        }
+      },
+      "required": [
+        "method",
+        "score",
+        "threshold",
+        "is_contaminated",
+        "details"
+      ],
+      "title": "ContaminationFlag",
+      "type": "object"
+    },
+    "ContaminationType": {
+      "description": "Methods used to detect benchmark contamination.",
+      "enum": [
+        "lexical",
+        "semantic",
+        "timeline",
+        "differential"
+      ],
+      "title": "ContaminationType",
+      "type": "string"
+    },
+    "MutationProbeResult": {
+      "description": "Result of a single test mutation probe round.",
+      "properties": {
+        "mutation_id": {
+          "title": "Mutation Id",
+          "type": "string"
+        },
+        "strategy": {
+          "title": "Strategy",
+          "type": "string"
+        },
+        "original_passed": {
+          "title": "Original Passed",
+          "type": "boolean"
+        },
+        "mutated_passed": {
+          "title": "Mutated Passed",
+          "type": "boolean"
+        },
+        "diff_summary": {
+          "default": "",
+          "title": "Diff Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mutation_id",
+        "strategy",
+        "original_passed",
+        "mutated_passed"
+      ],
+      "title": "MutationProbeResult",
+      "type": "object"
+    },
+    "ReportSummary": {
+      "description": "Aggregated summary of an EvalGuard audit run.",
+      "properties": {
+        "total_tasks": {
+          "default": 0,
+          "title": "Total Tasks",
+          "type": "integer"
+        },
+        "agent_passed_tasks": {
+          "default": 0,
+          "title": "Agent Passed Tasks",
+          "type": "integer"
+        },
+        "boundary_violations_total": {
+          "default": 0,
+          "title": "Boundary Violations Total",
+          "type": "integer"
+        },
+        "tasks_with_violations": {
+          "default": 0,
+          "title": "Tasks With Violations",
+          "type": "integer"
+        },
+        "tasks_with_reward_hack": {
+          "default": 0,
+          "title": "Tasks With Reward Hack",
+          "type": "integer"
+        },
+        "tasks_with_contamination": {
+          "default": 0,
+          "title": "Tasks With Contamination",
+          "type": "integer"
+        },
+        "suspect_or_invalid_tests": {
+          "default": 0,
+          "title": "Suspect Or Invalid Tests",
+          "type": "integer"
+        },
+        "clean_passed_tasks": {
+          "default": 0,
+          "title": "Clean Passed Tasks",
+          "type": "integer"
+        }
+      },
+      "title": "ReportSummary",
+      "type": "object"
+    },
+    "RewardHackRecord": {
+      "description": "Audit report for reward hacking detection on a single task.",
+      "properties": {
+        "confidence_score": {
+          "default": 0.0,
+          "description": "0.0 = clean, 1.0 = definite reward hacking",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence Score",
+          "type": "number"
+        },
+        "tamper_events": {
+          "items": {
+            "$ref": "#/$defs/TamperEventRecord"
+          },
+          "title": "Tamper Events",
+          "type": "array"
+        },
+        "mutation_rounds_total": {
+          "default": 0,
+          "title": "Mutation Rounds Total",
+          "type": "integer"
+        },
+        "mutation_rounds_passed": {
+          "default": 0,
+          "title": "Mutation Rounds Passed",
+          "type": "integer"
+        },
+        "mutation_pass_rate": {
+          "default": 1.0,
+          "title": "Mutation Pass Rate",
+          "type": "number"
+        },
+        "mutation_probes": {
+          "items": {
+            "$ref": "#/$defs/MutationProbeResult"
+          },
+          "title": "Mutation Probes",
+          "type": "array"
+        },
+        "trajectory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrajectoryAnalysisRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "RewardHackRecord",
+      "type": "object"
+    },
+    "SnapshotDiffRecord": {
+      "description": "Summary of changes between pre-task and post-task workspace snapshots.",
+      "properties": {
+        "added_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Added Files",
+          "type": "array"
+        },
+        "removed_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Removed Files",
+          "type": "array"
+        },
+        "modified_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Modified Files",
+          "type": "array"
+        },
+        "total_files_before": {
+          "default": 0,
+          "title": "Total Files Before",
+          "type": "integer"
+        },
+        "total_files_after": {
+          "default": 0,
+          "title": "Total Files After",
+          "type": "integer"
+        }
+      },
+      "title": "SnapshotDiffRecord",
+      "type": "object"
+    },
+    "TamperEventRecord": {
+      "description": "Record of test tampering detected by static analysis.",
+      "properties": {
+        "tamper_type": {
+          "$ref": "#/$defs/TamperType"
+        },
+        "file_path": {
+          "title": "File Path",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "line_number": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Line Number"
+        },
+        "code_snippet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code Snippet"
+        }
+      },
+      "required": [
+        "tamper_type",
+        "file_path",
+        "description"
+      ],
+      "title": "TamperEventRecord",
+      "type": "object"
+    },
+    "TamperType": {
+      "description": "Categorization of agent test tampering methods.",
+      "enum": [
+        "direct_test_modification",
+        "conftest_injection",
+        "sys_path_manipulation",
+        "mock_interception"
+      ],
+      "title": "TamperType",
+      "type": "string"
+    },
+    "TaskAuditRecord": {
+      "description": "Complete audit record for a single benchmark task execution.",
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "agent_passed": {
+          "title": "Agent Passed",
+          "type": "boolean"
+        },
+        "duration_seconds": {
+          "default": 0.0,
+          "title": "Duration Seconds",
+          "type": "number"
+        },
+        "violations": {
+          "items": {
+            "$ref": "#/$defs/BoundaryViolationRecord"
+          },
+          "title": "Violations",
+          "type": "array"
+        },
+        "snapshot_diff": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SnapshotDiffRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reward_hack": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RewardHackRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "contamination_flags": {
+          "items": {
+            "$ref": "#/$defs/ContaminationFlag"
+          },
+          "title": "Contamination Flags",
+          "type": "array"
+        },
+        "test_integrity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TestIntegrityRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        }
+      },
+      "required": [
+        "task_id",
+        "agent_passed"
+      ],
+      "title": "TaskAuditRecord",
+      "type": "object"
+    },
+    "TaskIntegrityStatus": {
+      "description": "Integrity evaluation of the benchmark test case itself.",
+      "enum": [
+        "PASS",
+        "SUSPECT",
+        "INVALID"
+      ],
+      "title": "TaskIntegrityStatus",
+      "type": "string"
+    },
+    "TestIntegrityRecord": {
+      "description": "Audit of the benchmark test case's correctness.",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/TaskIntegrityStatus",
+          "default": "PASS"
+        },
+        "reference_solver_passed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference Solver Passed"
+        },
+        "trivially_permissive": {
+          "default": false,
+          "title": "Trivially Permissive",
+          "type": "boolean"
+        },
+        "universal_pass_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Universal Pass Rate"
+        },
+        "cross_harness_divergence": {
+          "default": false,
+          "title": "Cross Harness Divergence",
+          "type": "boolean"
+        },
+        "evidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "title": "TestIntegrityRecord",
+      "type": "object"
+    },
+    "TrajectoryAnalysisRecord": {
+      "description": "Analysis of agent's edit and solution trajectory.",
+      "properties": {
+        "edit_count": {
+          "default": 0,
+          "title": "Edit Count",
+          "type": "integer"
+        },
+        "time_to_first_pass_seconds": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time To First Pass Seconds"
+        },
+        "test_runs_before_success": {
+          "default": 0,
+          "title": "Test Runs Before Success",
+          "type": "integer"
+        },
+        "first_attempt_success": {
+          "default": false,
+          "title": "First Attempt Success",
+          "type": "boolean"
+        },
+        "trajectory_anomaly_score": {
+          "default": 0.0,
+          "description": "0.0 = typical iterative solving, 1.0 = highly anomalous one-shot bypass",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Trajectory Anomaly Score",
+          "type": "number"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "title": "TrajectoryAnalysisRecord",
+      "type": "object"
+    }
+  },
+  "description": "The canonical EvalGuard audit report.",
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "description": "Version of the EvalGuard schema",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "benchmark_id": {
+      "title": "Benchmark Id",
+      "type": "string"
+    },
+    "agent_id": {
+      "title": "Agent Id",
+      "type": "string"
+    },
+    "harness_name": {
+      "default": "unknown",
+      "title": "Harness Name",
+      "type": "string"
+    },
+    "summary": {
+      "$ref": "#/$defs/ReportSummary"
+    },
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/TaskAuditRecord"
+      },
+      "title": "Tasks",
+      "type": "array"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "benchmark_id",
+    "agent_id"
+  ],
+  "title": "EvalGuardReport",
+  "type": "object"
+}

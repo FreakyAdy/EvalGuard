@@ -1,0 +1,24 @@
+name: terminal-bench
+task_workspace_root: ./tb_workspace
+allowed_write_paths:
+  - ./tb_workspace
+  - /tmp
+denied_write_paths:
+  - /etc
+  - /usr/bin
+  - /sbin
+  - ~/.ssh
+allowed_env_vars:
+  - PATH
+  - HOME
+  - USER
+  - SHELL
+  - TERM
+  - SHLVL
+  - PWD
+allowed_network_cidrs: []
+allow_outbound_network: false
+max_memory_mb: 4096
+timeout_seconds: 600
+prevent_ghost_processes: true
+track_shared_memory: true

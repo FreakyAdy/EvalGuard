@@ -1,0 +1,30 @@
+name: swebench-verified
+task_workspace_root: ./workspace
+allowed_write_paths:
+  - ./workspace
+  - /tmp/swebench_scratch
+denied_write_paths:
+  - /etc
+  - /usr
+  - /bin
+  - /sbin
+  - ~/.ssh
+  - ~/.aws
+  - ~/.gnupg
+allowed_env_vars:
+  - PATH
+  - HOME
+  - USER
+  - LANG
+  - LC_ALL
+  - PYTHONPATH
+  - VIRTUAL_ENV
+  - TERM
+  - TMPDIR
+  - EVALGUARD_TASK_ID
+allowed_network_cidrs: []
+allow_outbound_network: false
+max_memory_mb: 8192
+timeout_seconds: 1800
+prevent_ghost_processes: true
+track_shared_memory: true

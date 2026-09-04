@@ -1,0 +1,57 @@
+site_name: EvalGuard Documentation
+site_description: Benchmark Integrity Infrastructure for Agent Evaluations
+site_url: https://evalguard.github.io
+repo_url: https://github.com/evalguard/evalguard
+repo_name: evalguard/evalguard
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - content.code.select
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+
+nav:
+  - Overview: index.md
+  - Quickstart: quickstart.md
+  - Architecture: architecture.md
+  - Components:
+      - Sandbox: components/sandbox.md
+      - Reward Hacking: components/rewardhack.md
+      - Contamination: components/contamination.md
+      - Test Audit: components/testaudit.md
+      - Report Format: components/report_format.md
+  - Adapters:
+      - Writing an Adapter: adapters/writing_an_adapter.md
+      - Adapter Test Suite: adapters/adapter_test_suite.md
+  - Contributing: contributing.md
