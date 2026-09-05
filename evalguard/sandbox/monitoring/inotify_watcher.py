@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from collections.abc import Callable
 from datetime import datetime, timezone
@@ -17,6 +18,15 @@ from evalguard.sandbox.profiles import SandboxProfile
 logger = logging.getLogger(__name__)
 
 
+def _compute_file_hash(p: Path) -> str | None:
+    try:
+        if p.is_file():
+            return hashlib.sha256(p.read_bytes()).hexdigest()
+    except Exception:
+        return None
+    return None
+
+
 class BoundaryViolationHandler(FileSystemEventHandler):
     """Event handler that validates file system operations against a SandboxProfile."""
 
@@ -25,14 +35,37 @@ class BoundaryViolationHandler(FileSystemEventHandler):
         task_id: str,
         profile: SandboxProfile,
         on_violation: Callable[[BoundaryViolationRecord], None] | None = None,
+        watch_paths: list[Path] | None = None,
     ) -> None:
         super().__init__()
         self.task_id = task_id
         self.profile = profile
         self.on_violation = on_violation
         self.violations: list[BoundaryViolationRecord] = []
+        self._pre_mtimes: dict[str, float] = {}
+
+        # Capture mtimes of pre-existing files in watch scopes (instantaneous)
+        for wp in watch_paths or []:
+            try:
+                if wp.is_dir():
+                    for item in wp.iterdir():
+                        if item.is_file():
+                            self._pre_mtimes[str(item.resolve())] = item.stat().st_mtime
+            except Exception:
+                pass
 
     def _check_and_record(self, path: str, op: str) -> None:
+        resolved = str(Path(path).resolve())
+
+        # Discard false-positive modify events triggered by read/access timestamps
+        if op == "modify" and resolved in self._pre_mtimes:
+            try:
+                cur_mtime = Path(resolved).stat().st_mtime
+                if cur_mtime == self._pre_mtimes[resolved]:
+                    return
+            except Exception:
+                pass
+
         if not self.profile.is_path_writable(path):
             detail = (
                 f"Filesystem boundary violation in task {self.task_id}: unauthorized {op} "
@@ -79,7 +112,9 @@ class InotifyWatcher:
         self.watch_paths = [
             Path(p).resolve() for p in (watch_paths or [profile.task_workspace_root])
         ]
-        self.handler = BoundaryViolationHandler(task_id, profile, on_violation)
+        self.handler = BoundaryViolationHandler(
+            task_id, profile, on_violation, watch_paths=self.watch_paths
+        )
         self.observer: Any = None
 
     def start(self) -> None:

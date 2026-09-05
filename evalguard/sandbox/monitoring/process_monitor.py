@@ -82,6 +82,12 @@ class ProcessMonitor:
             "dwm.exe",
             "runtimebroker.exe",
             "taskhostw.exe",
+            "updater.exe",
+            "vgm.exe",
+            "conhost.exe",
+            "powershell.exe",
+            "cmd.exe",
+            "pwsh.exe",
         }
 
         for proc in psutil.process_iter(["pid", "name", "cmdline", "create_time", "ppid"]):

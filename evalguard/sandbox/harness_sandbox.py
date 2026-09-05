@@ -141,12 +141,25 @@ class HarnessSandbox:
         except (EbpfUnavailableError, Exception) as e:
             logger.debug("eBPF watcher unavailable (%s), using inotify watcher", e)
             self._ebpf_watcher = None
+            watch_dirs = [workspace_path]
+            try:
+                import tempfile
+                temp_root = Path(tempfile.gettempdir()).resolve()
+                ws_parent = workspace_path.parent.resolve()
+                if (
+                    ws_parent.exists()
+                    and ws_parent != temp_root
+                    and ws_parent != Path.home().resolve()
+                    and ws_parent != ws_parent.parent
+                ):
+                    watch_dirs.append(ws_parent)
+            except Exception:
+                pass
+
             self._inotify_watcher = InotifyWatcher(
                 self.task_id,
                 self.profile,
-                watch_paths=[
-                    workspace_path.parent if workspace_path.parent.exists() else workspace_path
-                ],
+                watch_paths=watch_dirs,
                 on_violation=self._record_violation,
             )
             self._inotify_watcher.start()

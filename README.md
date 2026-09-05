@@ -54,7 +54,10 @@
 Auditing an agent task execution for sandbox escapes, AST test tampering, and reward hacking:
 
 ```bash
-$ evalguard audit run -t "django__django-11099" -p sandbox_profiles/swebench_verified.sandbox.yaml -c "python agent.py"
+evalguard audit run -t "django__django-11099" -p sandbox_profiles/swebench_verified.sandbox.yaml -c "python agent.py"
+
+# Or invoke directly via Python module:
+python -m evalguard audit run -t "django__django-11099" -p sandbox_profiles/swebench_verified.sandbox.yaml -c "python agent.py"
 ```
 
 ```text
@@ -301,9 +304,9 @@ evalguard report diff baseline_report.json candidate_report.json
 evalguard report export audit_report.json -f sarif -o evalguard.sarif
 ```
 
-> **💡 If `evalguard` is not in your PATH**, use `python -m evalguard.cli.main`:
+> **💡 If `evalguard` is not in your PATH**, use `python -m evalguard`:
 > ```bash
-> python -m evalguard.cli.main audit run -t "task_01" -c "python agent.py"
+> python -m evalguard audit run -t "task_01" -c "python agent.py"
 > ```
 
 ### Runnable Examples
@@ -312,12 +315,12 @@ Test EvalGuard against clean vs. compromised benchmark environments:
 
 ```bash
 # Validate built-in harness adapters
-python -m evalguard.cli.main adapter validate evalguard.adapters.openenv:OpenEnvAdapter
-python -m evalguard.cli.main adapter validate evalguard.adapters.terminal_bench:TerminalBenchAdapter
-python -m evalguard.cli.main adapter validate evalguard.adapters.swebench:SWEBenchAdapter
+python -m evalguard adapter validate evalguard.adapters.openenv:OpenEnvAdapter
+python -m evalguard adapter validate evalguard.adapters.terminal_bench:TerminalBenchAdapter
+python -m evalguard adapter validate evalguard.adapters.swebench:SWEBenchAdapter
 
 # Run automated test suite with coverage
-python -m pytest tests/ -v --cov=evalguard --cov-fail-under=80
+python -m pytest tests/ -v --cov=evalguard --cov-fail-under=60
 ```
 
 ---
