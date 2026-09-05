@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -104,7 +104,7 @@ class InotifyWatcher:
         self,
         task_id: str,
         profile: SandboxProfile,
-        watch_paths: list[str | Path] | None = None,
+        watch_paths: Sequence[str | Path] | None = None,
         on_violation: Callable[[BoundaryViolationRecord], None] | None = None,
     ) -> None:
         self.task_id = task_id

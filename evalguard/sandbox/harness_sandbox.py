@@ -144,6 +144,7 @@ class HarnessSandbox:
             watch_dirs = [workspace_path]
             try:
                 import tempfile
+
                 temp_root = Path(tempfile.gettempdir()).resolve()
                 ws_parent = workspace_path.parent.resolve()
                 if (

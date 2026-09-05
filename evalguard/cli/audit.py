@@ -121,19 +121,22 @@ def run_audit(
 
         # Check overall integrity status
         is_compromised = bool(audit_record.violations or tamper_events or hack_score >= 0.5)
-        status_str = (
-            "COMPROMISED" if is_compromised else ("CLEAN" if audit_record.agent_passed else "FAIL")
-        )
+        status_str = "COMPROMISED" if is_compromised else "CLEAN"
 
         # Render Rich Formatted Audit Report
         console.print(
             "\n[bold cyan]============================================================\n  EVALGUARD BENCHMARK INTEGRITY AUDIT REPORT\n============================================================[/bold cyan]\n"
         )
 
+        agent_outcome_tag = (
+            "UNTRUSTED"
+            if is_compromised
+            else ("VERIFIED PASS" if audit_record.agent_passed else "FAILED")
+        )
         meta_lines = [
             f"  [bold]Task ID:[/bold]           {task_id}",
             f"  [bold]Harness:[/bold]           {adapter.name}",
-            f"  [bold]Agent Passed:[/bold]      [{'green' if audit_record.agent_passed else 'red'}]{audit_record.agent_passed}[/] ({'UNTRUSTED' if is_compromised else 'VERIFIED'})",
+            f"  [bold]Agent Passed:[/bold]      [{'green' if audit_record.agent_passed else 'red'}]{audit_record.agent_passed}[/] ({agent_outcome_tag})",
             f"  [bold]Integrity Status:[/bold]  [{'bold red' if is_compromised else 'bold green'}]{status_str}[/]",
             f"  [bold]Duration:[/bold]          {audit_record.duration_seconds}s",
             f"  [bold]Backend:[/bold]           {backend} (evalguard-{task_id})",
