@@ -23,6 +23,80 @@ class VariableRenameTransformer(ast.NodeTransformer):
         return node
 
 
+class DocstringStripper(ast.NodeTransformer):
+    """Removes docstrings from modules, classes, and functions."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.removed_count = 0
+
+    def _strip_docstring(
+        self, node: ast.Module | ast.AsyncFunctionDef | ast.FunctionDef | ast.ClassDef
+    ) -> None:
+        if (
+            node.body
+            and isinstance(node.body[0], ast.Expr)
+            and isinstance(node.body[0].value, ast.Constant)
+            and isinstance(node.body[0].value.value, str)
+        ):
+            node.body.pop(0)
+            self.removed_count += 1
+
+    def visit_Module(self, node: ast.Module) -> ast.Module:
+        self.generic_visit(node)
+        self._strip_docstring(node)
+        return node
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
+        self.generic_visit(node)
+        self._strip_docstring(node)
+        return node
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
+        self.generic_visit(node)
+        self._strip_docstring(node)
+        return node
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AsyncFunctionDef:
+        self.generic_visit(node)
+        self._strip_docstring(node)
+        return node
+
+
+class DocstringStrippingMutator(MutationStrategy):
+    """Strips docstrings and inline comments from test source via AST round-trip."""
+
+    @classmethod
+    def strategy_name(cls) -> str:
+        return "docstring_stripping"
+
+    def mutate(self, test_source: str) -> list[MutatedTest]:
+        mutations: list[MutatedTest] = []
+        try:
+            tree = ast.parse(test_source)
+        except SyntaxError:
+            return []
+
+        transformer = DocstringStripper()
+        new_tree = transformer.visit(tree)
+        if transformer.removed_count > 0:
+            ast.fix_missing_locations(new_tree)
+            mutated_code = ast.unparse(new_tree)
+            mutations.append(
+                MutatedTest(
+                    mutation_id=f"docstring_strip_{uuid4().hex[:8]}",
+                    strategy_name=self.strategy_name(),
+                    original_code=test_source,
+                    mutated_code=mutated_code,
+                    description=(
+                        f"Stripped {transformer.removed_count} docstring(s) and removed inline "
+                        f"comments via AST round-trip"
+                    ),
+                )
+            )
+        return mutations
+
+
 class PythonVariableMutator(MutationStrategy):
     """Mutates variable names inside test functions while preserving exact semantics."""
 
