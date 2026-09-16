@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -127,18 +128,26 @@ class SandboxProfile(BaseModel):
         """Check whether a given path is legally writable under this profile."""
         norm_target = normalize_path(target_path)
 
-        # 1. Denied paths take absolute priority
+        # 1. Platform temp roots (e.g. macOS /var/folders/...) are implicitly writable.
+        #    On macOS `/var` resolves to `/private/var` via symlink, so a temporary
+        #    task workspace would otherwise be shadowed by the default `/var` denial
+        #    and every in-workspace write would be flagged as a boundary violation.
+        norm_temp = normalize_path(Path(tempfile.gettempdir()))
+        if norm_target == norm_temp or norm_target.startswith(norm_temp + os.sep):
+            return True
+
+        # 2. Denied paths take absolute priority
         for denied in self.denied_write_paths:
             norm_denied = normalize_path(denied)
             if norm_target == norm_denied or norm_target.startswith(norm_denied + os.sep):
                 return False
 
-        # 2. Check if it is inside task workspace root
+        # 3. Check if it is inside task workspace root
         norm_workspace = normalize_path(self.task_workspace_root)
         if norm_target == norm_workspace or norm_target.startswith(norm_workspace + os.sep):
             return True
 
-        # 3. Check allowed write paths
+        # 4. Check allowed write paths
         for allowed in self.allowed_write_paths:
             norm_allowed = normalize_path(allowed)
             if norm_target == norm_allowed or norm_target.startswith(norm_allowed + os.sep):

@@ -64,3 +64,15 @@ def test_sandbox_profile_validation_error_on_overlap() -> None:
             task_workspace_root="/etc",
             denied_write_paths=["/etc"],
         ).validate_paths()
+
+
+def test_is_path_writable_allows_platform_temp_root() -> None:
+    profile = SandboxProfile()
+    temp_scratch = Path(tempfile.gettempdir()) / "eg_scratch" / "agent_write.py"
+    assert profile.is_path_writable(temp_scratch) is True
+
+
+def test_is_path_writable_denies_system_paths() -> None:
+    profile = SandboxProfile()
+    assert profile.is_path_writable("/etc/hosts") is False
+    assert profile.is_path_writable("/var/system") is False
