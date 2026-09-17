@@ -153,3 +153,42 @@ def test_run_task_creates_context_implicitly() -> None:
         assert "task_implicit" in adapter._active_contexts
         adapter.reset_environment()
         assert not adapter._active_contexts
+
+
+def test_callable_agent_returning_task_result_is_passed_through() -> None:
+    from evalguard.adapters.base import TaskContext, TaskResult
+
+    with tempfile.TemporaryDirectory() as td:
+        adapter = GenericSubprocessAdapter(workspace_base_dir=td)
+
+        def agent(ctx: TaskContext) -> TaskResult:
+            return TaskResult(
+                task_id="task_ret",
+                passed=False,
+                duration_seconds=1.5,
+                output="agent reported manually",
+            )
+
+        res = adapter.run_task(agent, "task_ret")
+        assert res.passed is False
+        assert res.output == "agent reported manually"
+        assert res.duration_seconds == 1.5
+
+
+def test_callable_agent_returning_string_is_parsed_as_command() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        adapter = GenericSubprocessAdapter(workspace_base_dir=td)
+        res = adapter.run_task(lambda ctx: "definitely-not-a-real-binary-xyz", "task_strcmd")
+        assert res.passed is False
+        assert res.error
+        adapter.teardown_task("task_strcmd")
+
+
+def test_callable_agent_returning_dict_uses_boolean_truthiness() -> None:
+    with tempfile.TemporaryDirectory() as td:
+        adapter = GenericSubprocessAdapter(workspace_base_dir=td)
+        res = adapter.run_task(lambda ctx: {}, "task_dict")
+        assert res.passed is False
+        res_true = adapter.run_task(lambda ctx: {"ok": True}, "task_dict2")
+        assert res_true.passed is True
+        adapter.reset_environment()
