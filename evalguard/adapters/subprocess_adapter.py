@@ -139,6 +139,7 @@ class GenericSubprocessAdapter(HarnessAdapter):
 
         # 3. If a verification test command is provided, run it to determine pass/fail
         passed = agent_exit == 0
+        test_exit: int | None = None
         if self.test_command_builder:
             test_cmd = self.test_command_builder(context)
             try:
@@ -153,17 +154,29 @@ class GenericSubprocessAdapter(HarnessAdapter):
                 output_chunks.append(f"[TEST STDOUT]\n{test_proc.stdout}")
                 if test_proc.stderr:
                     output_chunks.append(f"[TEST STDERR]\n{test_proc.stderr}")
+                test_exit = test_proc.returncode
                 passed = test_proc.returncode == 0
             except Exception as test_err:
                 passed = False
                 output_chunks.append(f"[TEST ERROR] {test_err}")
+
+        if passed:
+            error: str | None = None
+        elif self.test_command_builder:
+            error = (
+                f"Test command failed with exit code: {test_exit}"
+                if test_exit is not None
+                else "Test command failed to execute"
+            )
+        else:
+            error = f"Non-zero exit code: {agent_exit}"
 
         return TaskResult(
             task_id=task_id,
             passed=passed,
             duration_seconds=round(time.time() - start_time, 3),
             output="\n".join(output_chunks),
-            error=None if passed else f"Non-zero exit code: {agent_exit}",
+            error=error,
         )
 
     def teardown_task(self, task_id: str) -> None:
