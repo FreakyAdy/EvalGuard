@@ -5,12 +5,51 @@ from __future__ import annotations
 import logging
 import shutil
 import subprocess
+import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from evalguard.sandbox.backends.base import CommandResult, SandboxBackend
 from evalguard.sandbox.profiles import SandboxProfile
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class DockerDiagnostic:
+    """Structured result of probing the local Docker installation.
+
+    ``available`` is ``True`` only when both the CLI binary is on ``PATH``
+    and the daemon answers ``docker info`` successfully.
+    """
+
+    available: bool
+    reason: str
+    hints: tuple[str, ...] = ()
+
+    @classmethod
+    def ok(cls) -> DockerDiagnostic:
+        """Return a diagnostic representing a healthy Docker installation."""
+        return cls(available=True, reason="Docker daemon is reachable and healthy.")
+
+    @staticmethod
+    def platform_hints() -> tuple[str, ...]:
+        """Return actionable instructions for the current platform."""
+        if sys.platform == "darwin":
+            return (
+                "Start Docker Desktop:\n    open -a Docker",
+                "Wait for the whale icon to stop animating before re-running.",
+            )
+        if sys.platform.startswith("win"):
+            return (
+                "Start Docker Desktop from the Start menu or run:\n    & \"C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe\"",
+                "If Docker Desktop reports 'no daemon', relaunch it and retry.",
+            )
+        return (
+            "Start the Docker daemon (needs sudo unless you are in the docker group):\n    sudo systemctl start docker",
+            "Enable auto-start on boot:\n    sudo systemctl enable --now docker",
+            "After starting, verify with:\n    docker info",
+        )
 
 
 class DockerBackend(SandboxBackend):
@@ -32,21 +71,72 @@ class DockerBackend(SandboxBackend):
         return "docker"
 
     @classmethod
-    def is_available(cls) -> bool:
-        """Check if docker binary is present and daemon is reachable."""
-        if not shutil.which("docker"):
-            return False
+    def diagnose(cls) -> DockerDiagnostic:
+        """Probe the local Docker installation and return a structured reason.
+
+        This is the diagnostic core used by :meth:`is_available` and surfaced
+        by the CLI when a requested backend fails to come up. It distinguishes
+        three failure modes so callers can emit actionable guidance:
+        binary missing on ``PATH``, daemon unreachable, and probe timeout.
+        """
+        docker_bin = shutil.which("docker")
+        if docker_bin is None:
+            hints = (
+                "Install the Docker CLI and add it to PATH:",
+                "    https://docs.docker.com/get-docker/",
+                DockerDiagnostic.platform_hints()[0],
+            )
+            return DockerDiagnostic(
+                available=False,
+                reason=(
+                    "Docker CLI not found on PATH. The 'docker' executable is required "
+                    "before the daemon can be reached."
+                ),
+                hints=hints,
+            )
+
         try:
             res = subprocess.run(
                 ["docker", "info"],
                 stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
                 timeout=3,
                 check=False,
             )
-            return res.returncode == 0
-        except Exception:
-            return False
+        except subprocess.TimeoutExpired:
+            return DockerDiagnostic(
+                available=False,
+                reason=(
+                    "Docker daemon did not respond to 'docker info' within 3s. "
+                    "The CLI is present but the daemon is likely not running."
+                ),
+                hints=DockerDiagnostic.platform_hints(),
+            )
+        except Exception as exc:  # pragma: no cover - defensive
+            return DockerDiagnostic(
+                available=False,
+                reason=f"Docker probe failed unexpectedly: {exc}",
+                hints=DockerDiagnostic.platform_hints(),
+            )
+
+        if res.returncode != 0:
+            stderr_tail = (res.stderr or b"").decode("utf-8", errors="replace").strip().splitlines()
+            detail = stderr_tail[-1] if stderr_tail else "docker info failed"
+            return DockerDiagnostic(
+                available=False,
+                reason=(
+                    f"Docker daemon is unreachable ({detail}). The CLI is present "
+                    "but the daemon is not answering 'docker info'."
+                ),
+                hints=DockerDiagnostic.platform_hints(),
+            )
+
+        return DockerDiagnostic.ok()
+
+    @classmethod
+    def is_available(cls) -> bool:
+        """Check if docker binary is present and daemon is reachable."""
+        return cls.diagnose().available
 
     def setup(self) -> None:
         """Start an idle container with workspace volume mounts."""

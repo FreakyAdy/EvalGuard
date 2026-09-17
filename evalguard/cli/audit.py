@@ -17,6 +17,7 @@ from evalguard.report.schema import (
 )
 from evalguard.rewardhack.mutations import ALL_MUTATION_STRATEGIES
 from evalguard.rewardhack.tamper_detector import TamperDetector
+from evalguard.sandbox.backends.docker import DockerBackend, DockerDiagnostic
 from evalguard.sandbox.profiles import SandboxProfile
 
 console = Console()
@@ -54,6 +55,25 @@ def run_audit(
         else "cli-audit-adapter",
         workspace_base_dir=sb_profile.task_workspace_root,
     )
+
+    # Pre-flight: emit actionable, color-coded guidance when an explicit isolation
+    # backend is requested but cannot come up on this host. This surfaces the
+    # structured DockerDiagnostic (probe reason + platform hints) instead of a
+    # bare warning, and hints at the `--backend auto` graceful fallback.
+    if backend == "docker" and not DockerBackend.is_available():
+        diag: DockerDiagnostic = DockerBackend.diagnose()
+        console.print(
+            f"\n[bold red]Backend '{backend}' requested but unavailable on this host.[/bold red]"
+        )
+        console.print(f"  [bold]Reason:[/bold] {diag.reason}")
+        if diag.hints:
+            console.print("  [bold yellow]Try one of the following:[/bold yellow]")
+            for hint in diag.hints:
+                console.print(f"    - {hint}")
+        console.print(
+            "\n  To run with automatic backend detection instead, retry with:\n"
+            "    evalguard audit run --backend auto"
+        )
 
     try:
         audit_record: TaskAuditRecord = adapter.run_task_with_audit(
