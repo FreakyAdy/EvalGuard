@@ -24,9 +24,7 @@ class StatisticalDetector:
         if not 0.0 <= universal_fail_threshold <= 1.0:
             raise ValueError("universal_fail_threshold must be between 0 and 1")
         if universal_fail_threshold >= universal_pass_threshold:
-            raise ValueError(
-                "universal_fail_threshold must be lower than universal_pass_threshold"
-            )
+            raise ValueError("universal_fail_threshold must be lower than universal_pass_threshold")
         if (
             isinstance(min_cohort_size, bool)
             or not isinstance(min_cohort_size, int)
