@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from evalguard.report.schema import TaskIntegrityStatus
 from evalguard.testaudit.reference_runner import ReferenceRunner
 from evalguard.testaudit.statistical_detector import StatisticalDetector
@@ -54,6 +56,36 @@ def test_statistical_detector_universal_pass_fail() -> None:
     rec_fail = detector.check_task_cohort("task_impossible", all_fail)
     assert rec_fail.status == TaskIntegrityStatus.SUSPECT
     assert "UNIVERSAL FAIL ANOMALY" in rec_fail.evidence[0]
+
+
+@pytest.mark.parametrize(
+    ("pass_threshold", "fail_threshold"),
+    [
+        (1.01, 0.02),
+        (-0.01, 0.0),
+        (0.98, 1.01),
+        (0.98, -0.01),
+        (0.98, 0.99),
+        (float("nan"), 0.02),
+        (0.98, float("nan")),
+    ],
+)
+def test_statistical_detector_rejects_invalid_thresholds(
+    pass_threshold: float, fail_threshold: float
+) -> None:
+    with pytest.raises(ValueError, match="threshold"):
+        StatisticalDetector(
+            universal_pass_threshold=pass_threshold,
+            universal_fail_threshold=fail_threshold,
+        )
+
+
+@pytest.mark.parametrize("min_cohort_size", [0, -1, True, 1.5])
+def test_statistical_detector_rejects_invalid_minimum_cohort_size(
+    min_cohort_size: int | float,
+) -> None:
+    with pytest.raises(ValueError, match="positive integer"):
+        StatisticalDetector(min_cohort_size=min_cohort_size)
 
 
 def test_test_auditor_export_github_issue() -> None:
