@@ -31,12 +31,8 @@ def _record_empty_process_baseline(monitor: ProcessMonitor) -> None:
 def test_harness_sandbox_clean_run(monkeypatch: pytest.MonkeyPatch) -> None:
     # The host backend observes host-wide state. Background Windows services can
     # create processes and sockets during this test, so isolate those observations.
-    monkeypatch.setattr(
-        HarnessSandbox, "_capture_network_connections", lambda _sandbox: set()
-    )
-    monkeypatch.setattr(
-        ProcessMonitor, "detect_ghost_processes", _ignore_host_process_noise
-    )
+    monkeypatch.setattr(HarnessSandbox, "_capture_network_connections", lambda _sandbox: set())
+    monkeypatch.setattr(ProcessMonitor, "detect_ghost_processes", _ignore_host_process_noise)
 
     with tempfile.TemporaryDirectory() as td:
         profile = SandboxProfile(task_workspace_root=td)
@@ -64,18 +60,12 @@ def test_harness_sandbox_detects_new_task_network_connection(
         "_capture_network_connections",
         lambda _sandbox: next(connections),
     )
-    monkeypatch.setattr(
-        ProcessMonitor, "record_pre_task_state", _record_empty_process_baseline
-    )
-    monkeypatch.setattr(
-        ProcessMonitor, "detect_ghost_processes", _ignore_host_process_noise
-    )
+    monkeypatch.setattr(ProcessMonitor, "record_pre_task_state", _record_empty_process_baseline)
+    monkeypatch.setattr(ProcessMonitor, "detect_ghost_processes", _ignore_host_process_noise)
 
     with tempfile.TemporaryDirectory() as td:
         profile = SandboxProfile(task_workspace_root=td)
-        with HarnessSandbox(
-            task_id="network_01", profile=profile, backend="host"
-        ) as sb:
+        with HarnessSandbox(task_id="network_01", profile=profile, backend="host") as sb:
             (Path(td) / "solution.py").write_text("def solve(): return 42")
 
     network_violations = [
@@ -89,20 +79,14 @@ def test_harness_sandbox_detects_new_task_network_connection(
 
 def test_harness_sandbox_detects_unauthorized_env_mutation() -> None:
     with tempfile.TemporaryDirectory() as td:
-        profile = SandboxProfile(
-            task_workspace_root=td, allowed_env_vars=["PATH", "HOME"]
-        )
-        with HarnessSandbox(
-            task_id="env_test_01", profile=profile, backend="host"
-        ) as sb:
+        profile = SandboxProfile(task_workspace_root=td, allowed_env_vars=["PATH", "HOME"])
+        with HarnessSandbox(task_id="env_test_01", profile=profile, backend="host") as sb:
             os.environ["LEAKED_SECRET_VAR"] = "compromised"
 
         try:
             violations = sb.get_violations()
             env_violations = [
-                v
-                for v in violations
-                if v.violation_type == BoundaryViolationType.ENV_VAR
+                v for v in violations if v.violation_type == BoundaryViolationType.ENV_VAR
             ]
             assert len(env_violations) > 0
             assert "LEAKED_SECRET_VAR" in env_violations[0].detail
