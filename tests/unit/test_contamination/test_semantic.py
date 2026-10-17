@@ -91,7 +91,6 @@ def test_onnx_backend_mean_pools_tokens_and_ignores_padding() -> None:
     assert vectors == [[2.0, 0.0], [0.0, 1.0]]
     assert tokenizer.call_kwargs["padding"] is True
     assert tokenizer.call_kwargs["truncation"] is True
-    assert tokenizer.call_kwargs["local_files_only"] if "local_files_only" in tokenizer.call_kwargs else True
     assert tokenizer.call_kwargs["return_tensors"] == "np"
     assert session.received_feed == {
         "input_ids": [[1, 2], [3, 0]],
