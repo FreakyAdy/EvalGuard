@@ -90,9 +90,7 @@ class OnnxRuntimeBackend(EmbeddingBackend):
     def _load_session(self) -> Any:
         if self._session is None:
             if not self.model_path.is_file():
-                raise FileNotFoundError(
-                    f"ONNX model file does not exist: {self.model_path}"
-                )
+                raise FileNotFoundError(f"ONNX model file does not exist: {self.model_path}")
             try:
                 import onnxruntime
             except ImportError as exc:
