@@ -19,6 +19,7 @@ from evalguard.contamination.lexical import (
 )
 from evalguard.contamination.semantic import (
     EmbeddingBackend,
+    OnnxRuntimeBackend,
     SemanticDetector,
     SentenceTransformersBackend,
     SimpleTfIdfBackend,
@@ -42,6 +43,7 @@ __all__ = [
     "EmbeddingBackend",
     "LexicalDetector",
     "LexicalMatchResult",
+    "OnnxRuntimeBackend",
     "SemanticDetector",
     "SentenceTransformersBackend",
     "SimpleTfIdfBackend",
