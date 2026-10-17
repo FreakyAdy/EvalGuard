@@ -60,20 +60,21 @@ def run_audit(
     # backend is requested but cannot come up on this host. This surfaces the
     # structured DockerDiagnostic (probe reason + platform hints) instead of a
     # bare warning, and hints at the `--backend auto` graceful fallback.
-    if backend == "docker" and not DockerBackend.is_available():
+    if backend == "docker":
         diag: DockerDiagnostic = DockerBackend.diagnose()
-        console.print(
-            f"\n[bold red]Backend '{backend}' requested but unavailable on this host.[/bold red]"
-        )
-        console.print(f"  [bold]Reason:[/bold] {diag.reason}")
-        if diag.hints:
-            console.print("  [bold yellow]Try one of the following:[/bold yellow]")
-            for hint in diag.hints:
-                console.print(f"    - {hint}")
-        console.print(
-            "\n  To run with automatic backend detection instead, retry with:\n"
-            "    evalguard audit run --backend auto"
-        )
+        if not diag.available:
+            console.print(
+                f"\n[bold red]Backend '{backend}' requested but unavailable on this host.[/bold red]"
+            )
+            console.print(f"  [bold]Reason:[/bold] {diag.reason}")
+            if diag.hints:
+                console.print("  [bold yellow]Try one of the following:[/bold yellow]")
+                for hint in diag.hints:
+                    console.print(f"    - {hint}")
+            console.print(
+                "\n  To run with automatic backend detection instead, retry with:\n"
+                "    evalguard audit run --backend auto"
+            )
 
     try:
         audit_record: TaskAuditRecord = adapter.run_task_with_audit(
