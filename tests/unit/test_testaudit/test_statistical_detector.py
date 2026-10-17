@@ -61,7 +61,9 @@ def test_cohort_matrix_detects_polarized_cohort_and_exports_issue() -> None:
     assert "EvalGuard Cohort Integrity Report" in markdown
     assert "polarized_cohort" in markdown
     assert "agent-00" in markdown
-    assert "50.0%" not in markdown  # each agent is at one extreme, not at the mean
+    assert "**Mean per-agent pass rate:** 50.0%" in markdown
+    assert "| 0.0% |" in markdown
+    assert "| 100.0% |" in markdown
 
 
 def test_cohort_matrix_does_not_flag_uniform_intermediate_performance() -> None:
