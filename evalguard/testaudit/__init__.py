@@ -7,12 +7,18 @@ from evalguard.testaudit.reference_runner import (
     TRIVIAL_SOLUTIONS,
     ReferenceRunner,
 )
-from evalguard.testaudit.statistical_detector import StatisticalDetector
+from evalguard.testaudit.statistical_detector import (
+    CohortMatrixAuditor,
+    CohortTaskAnalysis,
+    StatisticalDetector,
+)
 
 # Aliases
 TaskIntegrityReport = TestIntegrityRecord
 
 __all__ = [
+    "CohortMatrixAuditor",
+    "CohortTaskAnalysis",
     "CrossHarnessAuditor",
     "ReferenceRunner",
     "StatisticalDetector",
