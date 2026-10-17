@@ -42,7 +42,7 @@ class DockerDiagnostic:
             )
         if sys.platform.startswith("win"):
             return (
-                "Start Docker Desktop from the Start menu or run:\n    & \"C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe\"",
+                'Start Docker Desktop from the Start menu or run:\n    & "C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe"',
                 "If Docker Desktop reports 'no daemon', relaunch it and retry.",
             )
         return (
