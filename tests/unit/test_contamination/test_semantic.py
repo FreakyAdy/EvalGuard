@@ -102,7 +102,7 @@ def test_onnx_backend_accepts_sentence_embedding_output() -> None:
     backend = OnnxRuntimeBackend(
         model_path="not-loaded-in-this-test.onnx",
         session=_FakeSession(
-            [[ [0.1, 0.2], [0.5, 0.7] ]],
+            [[[0.1, 0.2], [0.5, 0.7]]],
             output_names=["sentence_embedding"],
         ),
         tokenizer=_FakeTokenizer(),
