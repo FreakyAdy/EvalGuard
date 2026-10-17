@@ -139,11 +139,11 @@ def test_gvisor_backend_mocked() -> None:
 def test_docker_diagnose_reports_missing_cli() -> None:
     with patch("evalguard.sandbox.backends.docker.shutil.which", return_value=None):
         diagnostic = DockerBackend.diagnose()
+        assert DockerBackend.is_available() is False
 
     assert diagnostic.available is False
     assert "CLI not found on PATH" in diagnostic.reason
     assert any("docs.docker.com/get-docker" in hint for hint in diagnostic.hints)
-    assert DockerBackend.is_available() is False
 
 
 def test_docker_diagnose_includes_daemon_error() -> None:
