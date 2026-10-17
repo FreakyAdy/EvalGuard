@@ -136,6 +136,7 @@ def test_gvisor_backend_mocked() -> None:
             backend.teardown()
             assert backend._is_running is False
 
+
 def test_docker_diagnose_reports_missing_cli() -> None:
     with patch("evalguard.sandbox.backends.docker.shutil.which", return_value=None):
         diagnostic = DockerBackend.diagnose()
@@ -147,7 +148,9 @@ def test_docker_diagnose_reports_missing_cli() -> None:
 
 
 def test_docker_diagnose_includes_daemon_error() -> None:
-    failed_result = MagicMock(returncode=1, stdout="", stderr=b"permission denied\\nCannot connect to the Docker daemon")
+    failed_result = MagicMock(
+        returncode=1, stdout="", stderr=b"permission denied\nCannot connect to the Docker daemon"
+    )
     with (
         patch("evalguard.sandbox.backends.docker.shutil.which", return_value="/usr/bin/docker"),
         patch("evalguard.sandbox.backends.docker.subprocess.run", return_value=failed_result),
@@ -174,4 +177,3 @@ def test_docker_diagnose_handles_probe_timeout() -> None:
     assert diagnostic.available is False
     assert "within 3s" in diagnostic.reason
     assert diagnostic.hints
-
