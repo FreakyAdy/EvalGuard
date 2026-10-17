@@ -5,11 +5,14 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
+import pytest
 from click.testing import CliRunner
 
 from evalguard.cli.main import cli
 from evalguard.report.builder import ReportBuilder
-from evalguard.report.schema import TaskAuditRecord
+from evalguard.report.schema import BoundaryViolationRecord, TaskAuditRecord
+from evalguard.sandbox.harness_sandbox import HarnessSandbox
+from evalguard.sandbox.monitoring.process_monitor import ProcessMonitor
 
 
 def test_cli_version_and_help() -> None:
@@ -97,7 +100,20 @@ def test_cli_adapter_validate() -> None:
     assert "SUCCESS" in res.output
 
 
-def test_cli_audit_run() -> None:
+def _ignore_host_ghost_processes(
+    _monitor: ProcessMonitor,
+    _task_id: str,
+    _excluded_pids: set[int] | None = None,
+) -> list[BoundaryViolationRecord]:
+    """Keep the CLI smoke test independent of unrelated host services."""
+    return []
+
+
+def test_cli_audit_run(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The host backend observes machine-wide process/socket state. Services can
+    # start during this smoke test, so isolate observations from unrelated hosts.
+    monkeypatch.setattr(HarnessSandbox, "_capture_network_connections", lambda _sandbox: set())
+    monkeypatch.setattr(ProcessMonitor, "detect_ghost_processes", _ignore_host_ghost_processes)
     runner = CliRunner()
     with tempfile.TemporaryDirectory() as td:
         out_json = Path(td) / "audit_record.json"
