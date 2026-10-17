@@ -162,7 +162,7 @@ class OnnxRuntimeBackend(EmbeddingBackend):
         if not outputs:
             raise ValueError("ONNX model returned no outputs")
 
-        pooled = None
+        pooled: Any | None = None
         for index, name in enumerate(output_names[: len(outputs)]):
             if name in {"sentence_embedding", "sentence_embeddings", "embeddings"}:
                 direct_embeddings = self._to_nested_list(outputs[index])
