@@ -82,7 +82,7 @@ def test_statistical_detector_rejects_invalid_thresholds(
 
 @pytest.mark.parametrize("min_cohort_size", [0, -1, True, 1.5])
 def test_statistical_detector_rejects_invalid_minimum_cohort_size(
-    min_cohort_size: int,
+    min_cohort_size: int | float,
 ) -> None:
     with pytest.raises(ValueError, match="positive integer"):
         StatisticalDetector(min_cohort_size=min_cohort_size)
