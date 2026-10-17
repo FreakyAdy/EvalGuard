@@ -133,9 +133,7 @@ class CohortMatrixAuditor:
                 raise ValueError(f"{name} must be a finite number between 0 and 1")
 
         if universal_fail_threshold >= universal_pass_threshold:
-            raise ValueError(
-                "universal_fail_threshold must be lower than universal_pass_threshold"
-            )
+            raise ValueError("universal_fail_threshold must be lower than universal_pass_threshold")
         if (
             isinstance(min_agent_count, bool)
             or not isinstance(min_agent_count, int)
@@ -171,15 +169,11 @@ class CohortMatrixAuditor:
             if not isinstance(agent_id, str) or not agent_id.strip():
                 raise ValueError("agent IDs must be non-empty strings")
             if isinstance(outcomes, (str, bytes)) or not isinstance(outcomes, Sequence):
-                raise ValueError(
-                    f"Outcomes for agent '{agent_id}' must be a sequence of booleans"
-                )
+                raise ValueError(f"Outcomes for agent '{agent_id}' must be a sequence of booleans")
             if not outcomes:
                 raise ValueError(f"Outcomes for agent '{agent_id}' must not be empty")
             if any(not isinstance(outcome, bool) for outcome in outcomes):
-                raise ValueError(
-                    f"Outcomes for agent '{agent_id}' must contain only booleans"
-                )
+                raise ValueError(f"Outcomes for agent '{agent_id}' must contain only booleans")
 
             trials = len(outcomes)
             passed = sum(outcomes)
@@ -194,9 +188,7 @@ class CohortMatrixAuditor:
         pass_rate_stddev = math.sqrt(variance)
 
         if pass_rate_stddev == 0.0:
-            z_scores: dict[str, float | None] = {
-                agent_id: None for agent_id in pass_rates
-            }
+            z_scores: dict[str, float | None] = {agent_id: None for agent_id in pass_rates}
         else:
             z_scores = {
                 agent_id: (rate - mean_pass_rate) / pass_rate_stddev
@@ -227,17 +219,10 @@ class CohortMatrixAuditor:
             if bimodality is not None and bimodality >= self.bimodality_threshold:
                 flags.append("bimodal_pass_rate_distribution")
 
-            low_performers = sum(
-                rate <= self.universal_fail_threshold for rate in rates
-            )
-            high_performers = sum(
-                rate >= self.universal_pass_threshold for rate in rates
-            )
+            low_performers = sum(rate <= self.universal_fail_threshold for rate in rates)
+            high_performers = sum(rate >= self.universal_pass_threshold for rate in rates)
             required_group_size = max(2, math.ceil(agent_count * 0.2))
-            if (
-                low_performers >= required_group_size
-                and high_performers >= required_group_size
-            ):
+            if low_performers >= required_group_size and high_performers >= required_group_size:
                 flags.append("polarized_cohort")
 
         return CohortTaskAnalysis(
@@ -252,9 +237,7 @@ class CohortMatrixAuditor:
                 agent_id: None if z_score is None else round(z_score, 4)
                 for agent_id, z_score in z_scores.items()
             },
-            bimodality_coefficient=(
-                None if bimodality is None else round(bimodality, 4)
-            ),
+            bimodality_coefficient=(None if bimodality is None else round(bimodality, 4)),
             flags=tuple(flags),
             insufficient_data=insufficient_data,
             status=TaskIntegrityStatus.SUSPECT if flags else TaskIntegrityStatus.PASS,
