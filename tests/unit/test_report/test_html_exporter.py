@@ -155,7 +155,7 @@ def test_html_export_supports_severity_and_evidence_search() -> None:
     assert "benchmark/reference.py" in rendered
     assert 'option value="critical"' in rendered
     assert 'option value="none"' in rendered
-    assert re.search(r'function applyFilters\(\)', rendered)
+    assert re.search(r"function applyFilters\(\)", rendered)
 
 
 def test_html_export_embeds_the_complete_report_for_json_and_csv() -> None:
