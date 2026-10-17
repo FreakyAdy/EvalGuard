@@ -17,7 +17,7 @@ def _text(value: Any) -> str:
 def _list_items(values: list[str], empty_message: str = "None") -> str:
     """Render an escaped list of strings."""
     if not values:
-        return f"<p class=\"muted\">{_text(empty_message)}</p>"
+        return f'<p class="muted">{_text(empty_message)}</p>'
     return "<ul>" + "".join(f"<li>{_text(value)}</li>" for value in values) + "</ul>"
 
 
@@ -31,7 +31,7 @@ def _task_details(task: TaskAuditRecord) -> str:
             severity = str(violation.severity).lower()
             violation_rows.append(
                 "<tr>"
-                f"<td><span class=\"badge severity-{_text(severity)}\">{_text(violation.severity)}</span></td>"
+                f'<td><span class="badge severity-{_text(severity)}">{_text(violation.severity)}</span></td>'
                 f"<td>{_text(violation.violation_type.value)}</td>"
                 f"<td><code>{_text(violation.target)}</code></td>"
                 f"<td>{_text(violation.detail)}</td>"
@@ -40,14 +40,14 @@ def _task_details(task: TaskAuditRecord) -> str:
             )
         sections.append(
             "<section><h3>Boundary violations</h3>"
-            "<div class=\"table-scroll\"><table class=\"detail-table\"><thead><tr>"
+            '<div class="table-scroll"><table class="detail-table"><thead><tr>'
             "<th>Severity</th><th>Type</th><th>Target</th><th>Detail</th><th>Timestamp</th>"
-            "</tr></thead><tbody>"
-            + "".join(violation_rows)
-            + "</tbody></table></div></section>"
+            "</tr></thead><tbody>" + "".join(violation_rows) + "</tbody></table></div></section>"
         )
     else:
-        sections.append("<section><h3>Boundary violations</h3><p class=\"muted\">None recorded.</p></section>")
+        sections.append(
+            '<section><h3>Boundary violations</h3><p class="muted">None recorded.</p></section>'
+        )
 
     if task.snapshot_diff:
         diff = task.snapshot_diff
@@ -55,7 +55,7 @@ def _task_details(task: TaskAuditRecord) -> str:
             "<section><h3>Workspace snapshot</h3>"
             f"<p>Files before: <strong>{diff.total_files_before}</strong> · "
             f"files after: <strong>{diff.total_files_after}</strong></p>"
-            "<div class=\"evidence-grid\">"
+            '<div class="evidence-grid">'
             f"<div><h4>Added ({len(diff.added_files)})</h4>{_list_items(diff.added_files)}</div>"
             f"<div><h4>Removed ({len(diff.removed_files)})</h4>{_list_items(diff.removed_files)}</div>"
             f"<div><h4>Modified ({len(diff.modified_files)})</h4>{_list_items(diff.modified_files)}</div>"
@@ -71,7 +71,7 @@ def _task_details(task: TaskAuditRecord) -> str:
                 snippet = f"<pre><code>{_text(event.code_snippet)}</code></pre>"
             line = f":{event.line_number}" if event.line_number is not None else ""
             events.append(
-                "<article class=\"evidence-item\">"
+                '<article class="evidence-item">'
                 f"<h4>{_text(event.tamper_type.value)}</h4>"
                 f"<p><code>{_text(event.file_path)}{_text(line)}</code></p>"
                 f"<p>{_text(event.description)}</p>{snippet}</article>"
@@ -98,14 +98,8 @@ def _task_details(task: TaskAuditRecord) -> str:
             f"<p>Confidence score: <strong>{reward.confidence_score:.2f}</strong> · "
             f"Mutation probes passed: {reward.mutation_rounds_passed}/"
             f"{reward.mutation_rounds_total}</p>"
-            + ("".join(events) if events else "<p class=\"muted\">No tamper events recorded.</p>")
-            + (
-                "<h4>Mutation probes</h4><ul>"
-                + "".join(probes)
-                + "</ul>"
-                if probes
-                else ""
-            )
+            + ("".join(events) if events else '<p class="muted">No tamper events recorded.</p>')
+            + ("<h4>Mutation probes</h4><ul>" + "".join(probes) + "</ul>" if probes else "")
             + trajectory
             + "</section>"
         )
@@ -128,7 +122,7 @@ def _task_details(task: TaskAuditRecord) -> str:
             )
         contamination_html = "<ul>" + "".join(contamination_items) + "</ul>"
     else:
-        contamination_html = "<p class=\"muted\">No contamination flags recorded.</p>"
+        contamination_html = '<p class="muted">No contamination flags recorded.</p>'
     sections.append(f"<section><h3>Contamination</h3>{contamination_html}</section>")
 
     if task.test_integrity:
@@ -151,7 +145,9 @@ def _task_details(task: TaskAuditRecord) -> str:
             + "</section>"
         )
     else:
-        sections.append("<section><h3>Test integrity</h3><p class=\"muted\">No test-integrity audit recorded.</p></section>")
+        sections.append(
+            '<section><h3>Test integrity</h3><p class="muted">No test-integrity audit recorded.</p></section>'
+        )
 
     return "".join(sections)
 
@@ -160,8 +156,7 @@ def _task_search_text(task: TaskAuditRecord) -> str:
     """Build a searchable string that includes hidden, expandable evidence."""
     values = [task.task_id, "pass" if task.agent_passed else "fail"]
     values.extend(
-        f"{v.severity} {v.violation_type.value} {v.target} {v.detail}"
-        for v in task.violations
+        f"{v.severity} {v.violation_type.value} {v.target} {v.detail}" for v in task.violations
     )
     if task.reward_hack:
         values.extend(
@@ -404,11 +399,7 @@ class HtmlExporter:
             separators=(",", ":"),
         )
         # Prevent untrusted report strings from terminating the JSON script element.
-        report_data = (
-            report_data.replace("&", "\\u0026")
-            .replace("<", "\\u003c")
-            .replace(">", "\\u003e")
-        )
+        report_data = report_data.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
 
         document = r"""<!DOCTYPE html>
 <html lang="en" data-theme="dark">
