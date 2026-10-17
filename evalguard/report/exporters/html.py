@@ -399,7 +399,9 @@ class HtmlExporter:
             separators=(",", ":"),
         )
         # Prevent untrusted report strings from terminating the JSON script element.
-        report_data = report_data.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+        report_data = (
+            report_data.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+        )
 
         document = r"""<!DOCTYPE html>
 <html lang="en" data-theme="dark">
