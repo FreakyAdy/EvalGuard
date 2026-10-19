@@ -67,8 +67,7 @@ class HarborAdapter(HarnessAdapter):
             ),
         )
         self.task_paths = {
-            task_id: Path(path).expanduser().resolve()
-            for task_id, path in task_paths.items()
+            task_id: Path(path).expanduser().resolve() for task_id, path in task_paths.items()
         }
         self.model_name = model_name
         self.jobs_dir = Path(jobs_dir).expanduser().resolve()
@@ -94,9 +93,7 @@ class HarborAdapter(HarnessAdapter):
         if not task_path.is_dir():
             raise FileNotFoundError(f"Harbor task directory does not exist: {task_path}")
         if not (task_path / "task.toml").is_file():
-            raise FileNotFoundError(
-                f"Harbor task directory has no task.toml file: {task_path}"
-            )
+            raise FileNotFoundError(f"Harbor task directory has no task.toml file: {task_path}")
 
         output_root = self.jobs_dir / self._safe_task_name(task_id)
         output_root.mkdir(parents=True, exist_ok=True)
@@ -218,10 +215,7 @@ class HarborAdapter(HarnessAdapter):
             )
 
         duration = round(time.perf_counter() - started, 3)
-        output = (
-            f"[HARBOR STDOUT]\n{completed.stdout}\n"
-            f"[HARBOR STDERR]\n{completed.stderr}"
-        )
+        output = f"[HARBOR STDOUT]\n{completed.stdout}\n[HARBOR STDERR]\n{completed.stderr}"
         if completed.returncode != 0:
             return TaskResult(
                 task_id=task_id,
