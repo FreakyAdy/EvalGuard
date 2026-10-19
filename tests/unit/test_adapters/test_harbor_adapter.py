@@ -141,7 +141,7 @@ def test_harbor_adapter_reports_timeout(tmp_path: Path, monkeypatch: pytest.Monk
 
     def fake_run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
         raise subprocess.TimeoutExpired(
-            command=command,
+            cmd=command,
             timeout=kwargs["timeout"],
             output="partial stdout",
             stderr="timed out",
