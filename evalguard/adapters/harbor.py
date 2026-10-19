@@ -9,8 +9,9 @@ import math
 import re
 import subprocess
 import time
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 from uuid import uuid4
 
 from evalguard.adapters.base import (
@@ -142,7 +143,7 @@ class HarborAdapter(HarnessAdapter):
 
             reward = values.get(reward_key)
             if (
-                isinstance(reward, (int, float))
+                isinstance(reward, int | float)
                 and not isinstance(reward, bool)
                 and math.isfinite(float(reward))
             ):
