@@ -7,6 +7,7 @@ from evalguard.adapters.base import (
     TaskContext,
     TaskResult,
 )
+from evalguard.adapters.harbor import HarborAdapter
 from evalguard.adapters.openenv import OpenEnvAdapter
 from evalguard.adapters.subprocess_adapter import GenericSubprocessAdapter
 from evalguard.adapters.swebench import SWEBenchAdapter
@@ -24,6 +25,7 @@ __all__ = [
     "AdapterVerifier",
     "AgentProtocol",
     "GenericSubprocessAdapter",
+    "HarborAdapter",
     "HarnessAdapter",
     "OpenEnvAdapter",
     "SWEBenchAdapter",
