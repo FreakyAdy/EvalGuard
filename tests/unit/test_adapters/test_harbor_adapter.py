@@ -136,9 +136,7 @@ def test_harbor_adapter_does_not_treat_missing_reward_as_success(
     assert "no numeric 'reward' reward" in (result.error or "")
 
 
-def test_harbor_adapter_reports_timeout(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_harbor_adapter_reports_timeout(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     adapter = make_adapter(tmp_path, make_task(tmp_path))
 
     def fake_run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
